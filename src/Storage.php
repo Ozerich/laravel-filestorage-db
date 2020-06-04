@@ -2,6 +2,7 @@
 
 namespace Ozerich\FileStorage;
 
+use Illuminate\Http\Request;
 use Ozerich\FileStorage\Jobs\PrepareThumbnailsJob;
 use Ozerich\FileStorage\Models\File;
 use Ozerich\FileStorage\Services\ImageService;
@@ -10,7 +11,6 @@ use Ozerich\FileStorage\Services\Random;
 use Ozerich\FileStorage\Services\TempFile;
 use Ozerich\FileStorage\Structures\Scenario;
 use Ozerich\FileStorage\Structures\Thumbnail;
-use Illuminate\Http\Request;
 
 class Storage
 {

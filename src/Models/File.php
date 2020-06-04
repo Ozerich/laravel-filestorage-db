@@ -2,9 +2,9 @@
 
 namespace Ozerich\FileStorage\Models;
 
-use Ozerich\FileStorage\Storage;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Ozerich\FileStorage\Storage;
 
 class File extends Model
 {
