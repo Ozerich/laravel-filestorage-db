@@ -2,10 +2,9 @@
 
 namespace Ozerich\FileStorage\Rules;
 
-use App\Storage\Models\File;
-use App\Storage\Repositories\FileRepository;
-use App\Storage\Repositories\IFileRepository;
 use Illuminate\Contracts\Validation\Rule;
+use Ozerich\FileStorage\Models\File;
+use Ozerich\FileStorage\Repositories\FileRepository;
 
 class FileRule implements Rule
 {
