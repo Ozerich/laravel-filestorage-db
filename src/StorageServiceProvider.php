@@ -2,6 +2,8 @@
 
 namespace Ozerich\FileStorage;
 
+use Ozerich\FileStorage\Repositories\FileRepository;
+use Ozerich\FileStorage\Repositories\IFileRepository;
 use Ozerich\FileStorage\Services\TempFile;
 use Illuminate\Support\ServiceProvider;
 
@@ -14,7 +16,10 @@ class StorageServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        $this->app->bind(
+            IFileRepository::class,
+            FileRepository::class
+        );
     }
 
     /**
