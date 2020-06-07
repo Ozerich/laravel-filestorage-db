@@ -119,7 +119,7 @@ class File extends Model
             $thumbs = [];
 
             foreach ($scenario->getThumbnails() as $alias => $thumbnail) {
-                $thumbs[$this->dashesToCamelCase($alias)] = $this->getThumbnailJson($thumbnail->getThumbId());
+                $thumbs[$this->dashesToCamelCase($alias)] = $this->getThumbnailJson($alias);
             }
 
             $result = $thumbs;
