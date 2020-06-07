@@ -37,7 +37,12 @@ class File extends Model
     {
         $scenario = Storage::getScenario($this->scenario);
 
-        return $scenario->getStorage()->getFileUrl($this->hash, $this->ext);
+        $thumbnail = null;
+        if (!empty($thumbnail_alias)) {
+            $thumbnail = $scenario->getThumbnailByAlias($thumbnail_alias);
+        }
+
+        return $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail);
     }
 
     public function getUrl($thumbnail_alias = null)
