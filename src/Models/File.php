@@ -40,9 +40,9 @@ class File extends Model
         return $scenario->getStorage()->getFileUrl($this->hash, $this->ext);
     }
 
-    public function getUrl()
+    public function getUrl($thumbnail_alias = null)
     {
-        return $this->getAbsolutePath();
+        return $this->getAbsolutePath($thumbnail_alias);
     }
 
     public function getJson()
@@ -51,6 +51,38 @@ class File extends Model
             'id' => $this->id,
             'url' => $this->getAbsolutePath()
         ];
+    }
+
+    public function getThumbnailJson($thumbnailId)
+    {
+        $scenario = Storage::getScenario($this->scenario);
+
+        $thumbnail = $scenario->getThumbnailByAlias($thumbnailId);
+        if (!$thumbnail) {
+            return null;
+        }
+
+        $url = $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail);
+        $url2x = $thumbnail->is2xSupport() ? $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail, true) : null;
+        $url_webp = $thumbnail->isWebpSupport() ? $scenario->getStorage()->getFileUrl($this->hash, 'webp', $thumbnail, false) : null;
+        $url_webp2x = $thumbnail->isWebpSupport() ? $scenario->getStorage()->getFileUrl($this->hash, 'webp', $thumbnail, true) : null;
+
+        $item = [
+            'url' => $url,
+        ];
+
+        if ($thumbnail->is2xSupport()) {
+            $item['url_2x'] = $url2x;
+        }
+
+        if ($thumbnail->isWebpSupport()) {
+            $item['url_webp'] = $url_webp;
+            if ($thumbnail->isWebpSupport()) {
+                $item['url_webp_2x'] = $url_webp2x;
+            }
+        }
+
+        return $item;
     }
 
     private function dashesToCamelCase($string, $capitalizeFirstCharacter = false)
@@ -82,28 +114,7 @@ class File extends Model
             $thumbs = [];
 
             foreach ($scenario->getThumbnails() as $alias => $thumbnail) {
-                $url = $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail);
-                $url2x = $thumbnail->is2xSupport() ? $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail, true) : null;
-                $url_webp = $thumbnail->isWebpSupport() ? $scenario->getStorage()->getFileUrl($this->hash, 'webp', $thumbnail, false) : null;
-                $url_webp2x = $thumbnail->isWebpSupport() ? $scenario->getStorage()->getFileUrl($this->hash, 'webp', $thumbnail, true) : null;
-
-                $item = [
-                    'thumb' => $thumbnail->getThumbId(),
-                    'url' => $url,
-                ];
-
-                if ($thumbnail->is2xSupport()) {
-                    $item['url_2x'] = $url2x;
-                }
-
-                if ($thumbnail->isWebpSupport()) {
-                    $item['url_webp'] = $url_webp;
-                    if ($thumbnail->isWebpSupport()) {
-                        $item['url_webp_2x'] = $url_webp2x;
-                    }
-                }
-
-                $thumbs[$this->dashesToCamelCase($alias)] = $item;
+                $thumbs[$this->dashesToCamelCase($alias)] = $this->getThumbnailJson($thumbnail->getThumbId());
             }
 
             $result = $thumbs;
