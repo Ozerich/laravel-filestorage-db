@@ -45,6 +45,12 @@ class File extends Model
         return $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail);
     }
 
+    private function setScenario($scenario)
+    {
+        $this->scenario = $scenario;
+        $this->save();
+    }
+
     public function getUrl($thumbnail_alias = null)
     {
         return $this->getAbsolutePath($thumbnail_alias);
@@ -101,11 +107,15 @@ class File extends Model
         return $str;
     }
 
-    public function getFullJson()
+    public function getFullJson($scenario = null)
     {
-        $scenario = Storage::getScenario($this->scenario);
+        if ($scenario && $this->scenario != $scenario) {
+            $this->setScenario($scenario);
+        }
 
-        if ($scenario->getStorage()->isFileExists($this->hash, $this->ext) == false) {
+        $scenarioInstance = Storage::getScenario($this->scenario);
+
+        if ($scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext) == false) {
             return null;
         }
 
@@ -113,18 +123,17 @@ class File extends Model
 
         ];
 
-        if ($scenario->hasThumnbails()) {
+        if ($scenarioInstance->hasThumnbails()) {
             Storage::staticPrepareThumbnails($this);
 
             $thumbs = [];
 
-            foreach ($scenario->getThumbnails() as $alias => $thumbnail) {
+            foreach ($scenarioInstance->getThumbnails() as $alias => $thumbnail) {
                 $thumbs[$this->dashesToCamelCase($alias)] = $this->getThumbnailJson($alias);
             }
 
             $result = $thumbs;
         }
-
 
         return $result;
     }
