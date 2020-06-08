@@ -25,4 +25,14 @@ class FileRepository implements IFileRepository
     {
         return $this->model->find($id);
     }
+
+    /**
+     * Returns all the records.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection
+     */
+    public function all()
+    {
+        return $this->model->all();
+    }
 }

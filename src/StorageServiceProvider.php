@@ -2,10 +2,11 @@
 
 namespace Ozerich\FileStorage;
 
+use Illuminate\Support\ServiceProvider;
+use Ozerich\FileStorage\Commands\RegenerateThumbnailsCommand;
 use Ozerich\FileStorage\Repositories\FileRepository;
 use Ozerich\FileStorage\Repositories\IFileRepository;
 use Ozerich\FileStorage\Services\TempFile;
-use Illuminate\Support\ServiceProvider;
 
 class StorageServiceProvider extends ServiceProvider
 {
@@ -36,5 +37,11 @@ class StorageServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/config.php' => config_path('filestorage.php'),
         ]);
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                RegenerateThumbnailsCommand::class,
+            ]);
+        }
     }
 }
