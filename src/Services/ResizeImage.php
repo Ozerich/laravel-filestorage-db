@@ -229,7 +229,7 @@ class ResizeImage
     private function crop($optimalWidth, $optimalHeight, $newWidth, $newHeight, $forceSize = false)
     {
         if (!$forceSize) {
-            if ($newWidth > $this->height) {
+            if ($newHeight > $this->height) {
                 $newWidth /= ($newHeight / $this->height);
                 $newHeight = $this->height;
             }
