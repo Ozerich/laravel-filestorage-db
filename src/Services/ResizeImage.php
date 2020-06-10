@@ -209,8 +209,8 @@ class ResizeImage
 
     private function getOptimalCrop($newWidth, $newHeight)
     {
-        $heightRatio = $this->height / $newHeight;
-        $widthRatio = $this->width / $newWidth;
+        $heightRatio = $newHeight < $this->height ? $this->height / $newHeight : 1;
+        $widthRatio = $newWidth < $this->width ? $this->width / $newWidth : 1;
 
         if ($heightRatio < $widthRatio) {
             $optimalRatio = $heightRatio;
