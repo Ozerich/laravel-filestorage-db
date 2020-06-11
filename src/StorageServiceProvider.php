@@ -32,7 +32,7 @@ class StorageServiceProvider extends ServiceProvider
     {
         TempFile::setTmpFolder(storage_path());
 
-        $this->loadMigrationsFrom(__DIR__ . '/../Migrations');
+        $this->loadMigrationsFrom(__DIR__ . '/../migrations');
 
         $this->publishes([
             __DIR__ . '/config.php' => config_path('filestorage.php'),

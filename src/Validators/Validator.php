@@ -82,7 +82,6 @@ class Validator
         if (!is_file($file_path)) {
             return false;
         }
-
         if ($this->maxSize && filesize($file_path) > $this->maxSize) {
             $this->addError('The file is too big');
         }

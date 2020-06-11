@@ -33,6 +33,10 @@ class Storage
         $request = app()->request;
 
         $file = $request->file('file');
+        if (!$file) {
+            abort('400', 'File is empty');
+        }
+
         return $this->createFile($file->getPathName(), $file->getClientOriginalName(), $file->getClientOriginalExtension(), $scenarioInstance);
     }
 
@@ -58,6 +62,7 @@ class Storage
         } catch (\Exception $exception) {
 
         }
+
 
         $this->errors = [];
 
@@ -88,7 +93,7 @@ class Storage
         try {
             $file_info = ImageService::getImageInfo($file_path);
         } catch (\Exception $exception) {
-            return null;
+
         }
 
         $model = new File();
@@ -96,9 +101,9 @@ class Storage
         $model->hash = $file_hash;
         $model->name = $file_name;
         $model->scenario = $scenario->getId();
-        $model->width = $file_info['width'];
-        $model->height = $file_info['height'];
-        $model->size = $file_info['size'];
+        $model->width = $file_info['width'] ?? null;
+        $model->height = $file_info['height'] ?? null;
+        $model->size = filesize($file_path);
         $model->mime = mime_content_type($file_path);
         $model->ext = strtolower($file_ext);
 
