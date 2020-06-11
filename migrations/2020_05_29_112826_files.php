@@ -21,8 +21,8 @@ class Files extends Migration
             $table->string('ext');
             $table->string('mime');
             $table->string('size');
-            $table->string('width');
-            $table->string('height');
+            $table->string('width')->nullable();
+            $table->string('height')->nullable();
             $table->softDeletes();
             $table->timestamps();
         });
