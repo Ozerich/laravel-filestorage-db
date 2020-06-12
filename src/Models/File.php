@@ -64,6 +64,14 @@ class File extends Model
         ];
     }
 
+    public function getShortJson()
+    {
+        return [
+            'id' => $this->id,
+            'url' => $this->getAbsolutePath()
+        ];
+    }
+
     public function getThumbnailJson($thumbnailId)
     {
         $scenario = Storage::getScenario($this->scenario);
