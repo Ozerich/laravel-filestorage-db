@@ -4,6 +4,7 @@ namespace Ozerich\FileStorage\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Ozerich\FileStorage\Jobs\PrepareThumbnailsJob;
 use Ozerich\FileStorage\Storage;
 
 class File extends Model
@@ -45,10 +46,34 @@ class File extends Model
         return $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail);
     }
 
-    private function setScenario($scenario)
+    public function getPath()
     {
+        $scenario = Storage::getScenario($this->scenario);
+
+        return $scenario->getStorage()->getAbsoluteFilePath($this->hash, $this->ext);
+    }
+
+    public function setScenario($scenario, $regenerateThumbnails = false)
+    {
+        $oldScenarioInstance = Storage::getScenario($this->scenario);
+        $oldFilePath = $this->getPath();
+
+        if ($this->scenario == $scenario) {
+            return $this;
+        }
+
         $this->scenario = $scenario;
         $this->save();
+
+        $scenarioInstance = Storage::getScenario($this->scenario);
+
+        $scenarioInstance->getStorage()->upload($oldFilePath, $this->hash, $this->ext);
+
+        if ($regenerateThumbnails && $scenarioInstance && $scenarioInstance->hasThumnbails()) {
+            dispatch(new PrepareThumbnailsJob($this));
+        }
+
+        return $this;
     }
 
     public function getUrl($thumbnail_alias = null)
@@ -134,6 +159,7 @@ class File extends Model
                 $thumbs[$this->dashesToCamelCase($alias)] = $this->getThumbnailJson($alias);
             }
         }
+
 
         if (!$withOriginalUrl) {
             if (empty($thumbs)) {

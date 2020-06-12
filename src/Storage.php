@@ -5,6 +5,7 @@ namespace Ozerich\FileStorage;
 use Illuminate\Http\Request;
 use Ozerich\FileStorage\Jobs\PrepareThumbnailsJob;
 use Ozerich\FileStorage\Models\File;
+use Ozerich\FileStorage\Repositories\FileRepository;
 use Ozerich\FileStorage\Services\ImageService;
 use Ozerich\FileStorage\Services\ProcessImage;
 use Ozerich\FileStorage\Services\Random;
@@ -145,4 +146,17 @@ class Storage
         return ImageService::prepareThumbnails($file, (new StorageConfig())->getScenarioByName($file->scenario), $thumbnail);
     }
 
+    public function setFileScenario($fileId, $scenario)
+    {
+        $repository = new FileRepository(new File());
+
+        /** @var File $model */
+        $model = $repository->find($fileId);
+        if (!$model) {
+            return null;
+        }
+
+        $model->setScenario($scenario, true);
+        return $model;
+    }
 }
