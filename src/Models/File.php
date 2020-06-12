@@ -147,7 +147,7 @@ class File extends Model
         }
 
         $scenarioInstance = Storage::getScenario($this->scenario);
-        if ($scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext) == false) {
+        if (!$scenarioInstance || $scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext) == false) {
             return null;
         }
 
