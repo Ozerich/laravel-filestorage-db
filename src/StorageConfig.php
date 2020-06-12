@@ -11,9 +11,14 @@ use Ozerich\FileStorage\Structures\Scenario;
 
 class StorageConfig
 {
-    private function config($param = '')
+    private function config($param = '', $default = null)
     {
-        return \config()->get('filestorage' . (empty($param) ? '' : '.' . $param));
+        return \config()->get('filestorage' . (empty($param) ? '' : '.' . $param), $default);
+    }
+
+    public function getDefaultValidatorConfig()
+    {
+        return $this->config('defaultValidator', null);
     }
 
     public function getDefaultScenario()
@@ -23,7 +28,7 @@ class StorageConfig
             return null;
         }
 
-        $defaultValidator = $this->config('defaultValidator');
+        $defaultValidator = $this->getDefaultValidatorConfig();
 
         return new Scenario(null, [
             'storage' => $defaultStorage,
@@ -36,13 +41,19 @@ class StorageConfig
         if (empty($scenarioName)) {
             return $this->getDefaultScenario();
         }
-        
+
         $config = $this->config();
 
         if (!$config || !isset($config['scenarios']) || !isset($config['scenarios'][$scenarioName])) {
             return null;
         }
 
-        return new Scenario($scenarioName, $config['scenarios'][$scenarioName]);
+        $scenarioConfig = $config['scenarios'][$scenarioName];
+
+        if (!isset($scenarioConfig['validator'])) {
+            $scenarioConfig['validator'] = $this->getDefaultValidatorConfig();
+        }
+
+        return new Scenario($scenarioName, $scenarioConfig);
     }
 }
