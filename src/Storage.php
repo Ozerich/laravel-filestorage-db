@@ -14,30 +14,46 @@ use Ozerich\FileStorage\Structures\Thumbnail;
 
 class Storage
 {
-    public static function GetScenario($scenarioName)
+    private $config;
+
+    public function __construct()
     {
-        $config = config()->get('filestorage');
-
-        if (!$config || !isset($config['scenarios']) || !isset($config['scenarios'][$scenarioName])) {
-            return null;
-        }
-
-        return new Scenario($scenarioName, $config['scenarios'][$scenarioName]);
+        $this->config = new StorageConfig();
     }
 
-    public function createFromRequest($scenario)
+    public static function getScenario($scenario)
     {
-        $scenarioInstance = self::GetScenario($scenario);
+        return (new StorageConfig())->getScenarioByName($scenario);
+    }
 
+    public function createFromRequest($scenario = null, $requestFieldName = 'file')
+    {
         /** @var Request $request */
         $request = app()->request;
 
-        $file = $request->file('file');
+        $file = $request->file($requestFieldName);
         if (!$file) {
             abort('400', 'File is empty');
         }
 
-        return $this->createFile($file->getPathName(), $file->getClientOriginalName(), $file->getClientOriginalExtension(), $scenarioInstance);
+        if (!empty($scenario)) {
+            $scenarioInstance = $this->config->getScenarioByName($scenario);
+            if (!$scenario) {
+                abort('400', 'Invalid scenario');
+            }
+        } else {
+            $scenarioInstance = $this->config->getDefaultScenario();
+            if (!$scenarioInstance) {
+                abort('400', 'Base scenario is not set');
+            }
+        }
+
+        return $this->createFile(
+            $file->getPathName(),
+            $file->getClientOriginalName(),
+            $file->getClientOriginalExtension(),
+            $scenarioInstance
+        );
     }
 
     private function createFile($file_path, $file_name, $file_ext, Scenario $scenario)
@@ -63,7 +79,6 @@ class Storage
 
         }
 
-
         $this->errors = [];
 
         $file_ext = strtolower($file_ext);
@@ -76,7 +91,9 @@ class Storage
             return null;
         }
 
-        dispatch(new PrepareThumbnailsJob($model));
+        if ($scenario->hasThumnbails()) {
+            dispatch(new PrepareThumbnailsJob($model));
+        }
 
         return $model;
     }
@@ -115,7 +132,7 @@ class Storage
 
     public static function staticDeleteThumbnails(File $file, ?Thumbnail $thumbnail = null)
     {
-        $scenario = self::getScenario($file->scenario);
+        $scenario = (new StorageConfig())->getScenarioByName($file->scenario);
         $scenario->getStorage()->deleteAllThumbnails($file->hash);
     }
 
@@ -125,7 +142,7 @@ class Storage
             self::staticDeleteThumbnails($file, $thumbnail);
         }
 
-        return ImageService::prepareThumbnails($file, self::getScenario($file->scenario), $thumbnail);
+        return ImageService::prepareThumbnails($file, (new StorageConfig())->getScenarioByName($file->scenario), $thumbnail);
     }
 
 }

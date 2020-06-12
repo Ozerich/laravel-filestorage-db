@@ -46,7 +46,7 @@ class Scenario
 
         $this->createStorage($config['storage']);
 
-        if (isset($config['validator'])) {
+        if (isset($config['validator']) && $config['validator']) {
             $this->validator = $this->createValidator($config['validator']);
         }
 

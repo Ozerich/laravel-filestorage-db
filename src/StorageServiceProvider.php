@@ -35,7 +35,7 @@ class StorageServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__ . '/../migrations');
 
         $this->publishes([
-            __DIR__ . '/config.php' => config_path('filestorage.php'),
+            __DIR__ . '/../config.php' => config_path('filestorage.php'),
         ]);
 
         if ($this->app->runningInConsole()) {

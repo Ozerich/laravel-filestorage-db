@@ -56,7 +56,7 @@ class File extends Model
         return $this->getAbsolutePath($thumbnail_alias);
     }
 
-    public function getJson()
+    public function getUploadResponseJson()
     {
         return [
             'id' => $this->id,
