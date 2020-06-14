@@ -85,6 +85,9 @@ class File extends Model
     {
         return [
             'id' => $this->id,
+            'mime' => $this->mime,
+            'name' => $this->name,
+            'size' => $this->size,
             'url' => $this->getAbsolutePath()
         ];
     }
@@ -147,7 +150,7 @@ class File extends Model
         }
 
         $scenarioInstance = Storage::getScenario($this->scenario);
-        if (!$scenarioInstance || $scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext) == false) {
+        if ($scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext) == false) {
             return null;
         }
 

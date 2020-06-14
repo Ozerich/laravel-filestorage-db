@@ -45,7 +45,7 @@ class Storage
         } else {
             $scenarioInstance = $this->config->getDefaultScenario();
             if (!$scenarioInstance) {
-                abort('400', 'Base scenario is not set');
+                abort('400', 'Cannot create default scenario, it seems that defaultStorage is not set in config filestorage.php');
             }
         }
 
