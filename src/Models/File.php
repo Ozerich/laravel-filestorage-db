@@ -176,7 +176,7 @@ class File extends Model
 
         return [
             'url' => $this->getUrl(),
-            'thubmnails' => $thumbs
+            'thumbnails' => $thumbs
         ];
     }
 }
