@@ -8,6 +8,13 @@ use Ozerich\FileStorage\Structures\Thumbnail;
 
 class ImageService
 {
+    private static function createTempFile(File $file, Scenario $scenario)
+    {
+        $temp_file = new TempFile();
+        $scenario->getStorage()->download($file->hash, $file->ext, $temp_file->getPath());
+        return $temp_file;
+    }
+
     /**
      * @param File $image
      * @param Scenario $scenario
@@ -21,13 +28,16 @@ class ImageService
             return false;
         }
 
-        $temp_file = new TempFile();
-        $scenario->getStorage()->download($image->hash, $image->ext, $temp_file->getPath());
+        $temp_file = null;
 
         $thumbnails = $thumbnail ? [$thumbnail] : $scenario->getThumbnails();
         foreach ($thumbnails as $thumbnail) {
 
             if ($scenario->getStorage()->isFileExists($image->hash, $image->ext, $thumbnail) == false) {
+                if (!$temp_file) {
+                    $temp_file = self::createTempFile($image, $scenario);
+                }
+
                 $temp_thumbnail = new TempFile();
                 self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality());
                 $scenario->getStorage()->upload($temp_thumbnail->getPath(), $image->hash, $image->ext, $thumbnail);
@@ -40,6 +50,10 @@ class ImageService
             }
 
             if ($thumbnail->isWebpSupport() && $scenario->getStorage()->isFileExists($image->hash, 'webp', $thumbnail) == false) {
+                if (!$temp_file) {
+                    $temp_file = self::createTempFile($image, $scenario);
+                }
+
                 $temp_thumbnail = new TempFile();
                 self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), false, true);
                 $scenario->getStorage()->upload($temp_thumbnail->getPath(), $image->hash, 'webp', $thumbnail, false);

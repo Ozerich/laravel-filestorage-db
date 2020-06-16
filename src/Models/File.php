@@ -143,7 +143,7 @@ class File extends Model
         return $str;
     }
 
-    public function getFullJson($withOriginalUrl = false, $scenario = null)
+    public function getFullJson($withOriginalUrl = false, $scenario = null, $regenerateThumbnailsIfNeeded = true)
     {
         if ($scenario && $this->scenario != $scenario) {
             $this->setScenario($scenario);
@@ -156,7 +156,9 @@ class File extends Model
 
         $thumbs = [];
         if ($scenarioInstance->hasThumnbails()) {
-            Storage::staticPrepareThumbnails($this);
+            if ($regenerateThumbnailsIfNeeded) {
+                Storage::staticPrepareThumbnails($this);
+            }
 
             foreach ($scenarioInstance->getThumbnails() as $alias => $thumbnail) {
                 $thumbs[$this->dashesToCamelCase($alias)] = $this->getThumbnailJson($alias);
