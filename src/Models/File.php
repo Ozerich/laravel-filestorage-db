@@ -81,24 +81,18 @@ class File extends Model
         return $this->getAbsolutePath($thumbnail_alias);
     }
 
-    public function getUploadResponseJson()
+
+    private function dashesToCamelCase($string, $capitalizeFirstCharacter = false)
     {
-        return [
-            'id' => $this->id,
-            'mime' => $this->mime,
-            'name' => $this->name,
-            'size' => $this->size,
-            'url' => $this->getAbsolutePath()
-        ];
+        $str = str_replace('-', '', ucwords($string, '-'));
+
+        if (!$capitalizeFirstCharacter) {
+            $str = lcfirst($str);
+        }
+
+        return $str;
     }
 
-    public function getShortJson()
-    {
-        return [
-            'id' => $this->id,
-            'url' => $this->getAbsolutePath()
-        ];
-    }
 
     public function getThumbnailJson($thumbnailId)
     {
@@ -132,15 +126,15 @@ class File extends Model
         return $item;
     }
 
-    private function dashesToCamelCase($string, $capitalizeFirstCharacter = false)
+    public function getShortJson()
     {
-        $str = str_replace('-', '', ucwords($string, '-'));
-
-        if (!$capitalizeFirstCharacter) {
-            $str = lcfirst($str);
-        }
-
-        return $str;
+        return [
+            'id' => $this->id,
+            'mime' => $this->mime,
+            'name' => $this->name,
+            'size' => $this->size,
+            'url' => $this->getUrl()
+        ];
     }
 
     public function getFullJson($withOriginalUrl = false, $scenario = null, $regenerateThumbnailsIfNeeded = true)
@@ -164,7 +158,6 @@ class File extends Model
                 $thumbs[$this->dashesToCamelCase($alias)] = $this->getThumbnailJson($alias);
             }
         }
-
 
         if (!$withOriginalUrl) {
             if (empty($thumbs)) {

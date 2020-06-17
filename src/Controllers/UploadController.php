@@ -20,6 +20,6 @@ class UploadController extends Controller
             abort(400, 'Error upload file');
         }
 
-        return $file->getUploadResponseJson();
+        return $file->getShortJson();
     }
 }
