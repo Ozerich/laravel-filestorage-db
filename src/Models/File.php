@@ -137,7 +137,7 @@ class File extends Model
         ];
     }
 
-    public function getFullJson($withOriginalUrl = false, $scenario = null, $regenerateThumbnailsIfNeeded = true)
+    public function getFullJson($scenario = null, $withOriginalUrl = false, $regenerateThumbnailsIfNeeded = true)
     {
         if ($scenario && $this->scenario != $scenario) {
             $this->setScenario($scenario);
