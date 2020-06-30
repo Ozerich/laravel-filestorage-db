@@ -83,7 +83,7 @@ class Validator
             return false;
         }
         if ($this->maxSize && filesize($file_path) > $this->maxSize) {
-            $this->addError('The file is too big');
+            $this->addError('The file is too big, max file size is ' . round($this->maxSize / 1024 / 1024, 2) . ' MB');
         }
 
         if ($this->checkExtensionByMimeType) {

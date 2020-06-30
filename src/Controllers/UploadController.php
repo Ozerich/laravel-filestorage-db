@@ -17,7 +17,7 @@ class UploadController extends Controller
         $file = $storage->createFromRequest();
 
         if (!$file) {
-            abort(400, 'Error upload file');
+            abort(400, $storage->getUploadError());
         }
 
         return $file->getShortJson();

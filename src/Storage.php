@@ -17,6 +17,8 @@ class Storage
 {
     private $config;
 
+    private $uploadError = null;
+
     public function __construct()
     {
         $this->config = new StorageConfig();
@@ -27,6 +29,11 @@ class Storage
         return (new StorageConfig())->getScenarioByName($scenario);
     }
 
+    public function getUploadError()
+    {
+        return $this->uploadError;
+    }
+
     public function createFromRequest($scenario = null, $requestFieldName = 'file')
     {
         /** @var Request $request */
@@ -34,18 +41,21 @@ class Storage
 
         $file = $request->file($requestFieldName);
         if (!$file) {
-            abort('400', 'File is empty');
+            $this->uploadError = 'File is empty';
+            return null;
         }
 
         if (!empty($scenario)) {
             $scenarioInstance = $this->config->getScenarioByName($scenario);
             if (!$scenario) {
-                abort('400', 'Invalid scenario');
+                $this->uploadError = 'Invalid scenario';
+                return null;
             }
         } else {
             $scenarioInstance = $this->config->getDefaultScenario();
             if (!$scenarioInstance) {
-                abort('400', 'Cannot create default scenario, it seems that defaultStorage is not set in config filestorage.php');
+                $this->uploadError = 'Cannot create default scenario, it seems that defaultStorage is not set in config filestorage.php';
+                return null;
             }
         }
 
@@ -66,7 +76,8 @@ class Storage
         if ($validator) {
             $validate = $scenario->getValidator()->validate($file_path, $file_name);
             if (!$validate) {
-                $this->errors = $scenario->getValidator()->getErrors();
+                $errors = $scenario->getValidator()->getErrors();
+                $this->uploadError = array_shift($errors);
                 return null;
             }
         }
@@ -79,8 +90,6 @@ class Storage
         } catch (\Exception $exception) {
 
         }
-
-        $this->errors = [];
 
         $file_ext = strtolower($file_ext);
         $file_hash = Random::GetString();
