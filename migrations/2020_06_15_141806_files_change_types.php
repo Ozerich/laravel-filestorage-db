@@ -14,9 +14,15 @@ class FilesChangeTypes extends Migration
     public function up()
     {
         Schema::table('files', function (Blueprint $table) {
-            $table->unsignedInteger('width')->nullable()->change();
-            $table->unsignedInteger('height')->nullable()->change();
-            $table->unsignedInteger('size')->change();
+            if (Schema::hasColumn('files', 'width')) {
+                $table->unsignedInteger('width')->nullable()->change();
+            }
+            if (Schema::hasColumn('files', 'height')) {
+                $table->unsignedInteger('height')->nullable()->change();
+            }
+            if (Schema::hasColumn('files', 'size')) {
+                $table->unsignedInteger('size')->change();
+            }
         });
     }
 

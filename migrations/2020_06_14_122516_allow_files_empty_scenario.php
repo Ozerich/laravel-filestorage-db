@@ -14,7 +14,9 @@ class AllowFilesEmptyScenario extends Migration
     public function up()
     {
         Schema::table('files', function (Blueprint $table) {
-            $table->string('scenario')->nullable()->change();
+            if (Schema::hasColumn('files', 'scenario')) {
+                $table->string('scenario')->nullable()->change();
+            }
         });
     }
 

@@ -13,19 +13,21 @@ class Files extends Migration
      */
     public function up()
     {
-        Schema::create('files', function (Blueprint $table) {
-            $table->id();
-            $table->string('scenario');
-            $table->string('hash');
-            $table->string('name');
-            $table->string('ext');
-            $table->string('mime');
-            $table->string('size');
-            $table->string('width')->nullable();
-            $table->string('height')->nullable();
-            $table->softDeletes();
-            $table->timestamps();
-        });
+        if (Schema::hasTable('files') === false) {
+            Schema::create('files', function (Blueprint $table) {
+                $table->id();
+                $table->string('scenario');
+                $table->string('hash');
+                $table->string('name');
+                $table->string('ext');
+                $table->string('mime');
+                $table->string('size');
+                $table->string('width')->nullable();
+                $table->string('height')->nullable();
+                $table->softDeletes();
+                $table->timestamps();
+            });
+        }
     }
 
     /**
