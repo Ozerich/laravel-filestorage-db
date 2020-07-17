@@ -4,6 +4,7 @@ namespace Ozerich\FileStorage\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Ozerich\FileStorage\Exceptions\InvalidScenarioException;
 use Ozerich\FileStorage\Jobs\PrepareThumbnailsJob;
 use Ozerich\FileStorage\Storage;
 
@@ -55,7 +56,6 @@ class File extends Model
 
     public function setScenario($scenario, $regenerateThumbnails = false)
     {
-        $oldScenarioInstance = Storage::getScenario($this->scenario);
         $oldFilePath = $this->getPath();
 
         if ($this->scenario == $scenario) {
@@ -66,6 +66,9 @@ class File extends Model
         $this->save();
 
         $scenarioInstance = Storage::getScenario($this->scenario);
+        if (!$scenarioInstance) {
+            throw new InvalidScenarioException('Scenario "' . $this->scenario . '" not found');
+        }
 
         $scenarioInstance->getStorage()->upload($oldFilePath, $this->hash, $this->ext);
 
@@ -84,7 +87,7 @@ class File extends Model
 
     private function dashesToCamelCase($string, $capitalizeFirstCharacter = false)
     {
-        $str = str_replace('-', '', ucwords($string, '-'));
+        $str = str_replace(' - ', '', ucwords($string, ' - '));
 
         if (!$capitalizeFirstCharacter) {
             $str = lcfirst($str);
