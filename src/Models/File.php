@@ -51,6 +51,10 @@ class File extends Model
     {
         $scenario = Storage::getScenario($this->scenario);
 
+        if (!$scenario) {
+            return null;
+        }
+
         return $scenario->getStorage()->getAbsoluteFilePath($this->hash, $this->ext);
     }
 
