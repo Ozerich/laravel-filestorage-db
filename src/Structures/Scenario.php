@@ -31,7 +31,7 @@ class Scenario
     private $fixOrientation = true;
 
     /** @var integer */
-    private $quality = 100;
+    private $quality = 88;
 
     /**
      * Scenario constructor.
@@ -65,7 +65,7 @@ class Scenario
             $this->fixOrientation = (bool)$config['fixOrientation'];
         }
 
-        if (isset($config['quality'])) {
+        if (isset($config['quality']) && $config['quality']) {
             if ($config['quality'] > 0 && $config['quality'] < 1) {
                 $this->quality = $config['quality'] * 100;
             } else if ($config['quality'] > 100 || $config['quality'] < 1) {

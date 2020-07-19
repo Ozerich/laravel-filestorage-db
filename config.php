@@ -1,46 +1,21 @@
 <?php
 
-function imageValidator($maxMbSize = 20)
-{
-    return [
-        'maxSize' => $maxMbSize * 1024 * 1024,
-        'checkExtensionByMimeType' => true,
-        'extensions' => ['jpg', 'jpeg', 'png']
-    ];
-}
-
-function fileStorage($folder)
-{
-    return [
-        'type' => 'file',
-        'saveOriginalFilename' => false,
-        'uploadDirPath' => __DIR__ . '/../storage/app/public/uploads/' . $folder,
-        'uploadDirUrl' => '/uploads/' . $folder,
-    ];
-}
+use Ozerich\FileStorage\Utils\ConfigHelper;
 
 return [
-    'defaultStorage' => fileStorage('tmp'),
-
-    'defaultValidator' => [
-        'maxSize' => 20 * 1024 * 1024,
-        'checkExtensionByMimeType' => true,
-        'extensions' => ['jpg', 'jpeg', 'png', 'zip', 'docx', 'pdf', 'doc', 'rar', 'xls', 'xlsx', 'pptx', 'ppt', 'gif', 'mp4']
-    ],
+    'defaultStorage' => ConfigHelper::temporaryStorage(),
+    'defaultValidator' => ConfigHelper::defaultValidator(),
 
     'scenarios' => [
+        'zip' => [
+            'storage' => ConfigHelper::fileStorage('zip')
+        ],
         'image' => [
-            'storage' => fileStorage('image'),
-            'validator' => imageValidator(),
+            'storage' => ConfigHelper::fileStorage('products'),
+            'validator' => ConfigHelper::imageValidator(),
             'thumbnails' => [
-                'preview' => [
-                    'width' => 380,
-                    'height' => 250,
-                    'crop' => true,
-                    '2x' => true,
-                    'webp' => true,
-                    'quality' => 100
-                ],
+                'preview' => ConfigHelper::thumbWithWebpAnd2x(380, 250),
+                'og' => ConfigHelper::thumbOpenGraph(),
             ]
         ]
     ]
