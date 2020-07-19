@@ -12,6 +12,9 @@ class Scenario
     /** @var string */
     private $id;
 
+    /** @var bool */
+    private $isSingleThumbnail = false;
+
     /** @var array */
     private $thumbnails = [];
 
@@ -50,9 +53,13 @@ class Scenario
             $this->validator = $this->createValidator($config['validator']);
         }
 
-        if (isset($config['thumbnails'])) {
+        if (isset($config['thumbnail'])) {
+            $this->isSingleThumbnail = true;
+            $this->setThumbnails(['default' => $config['thumbnail']]);
+        } else if (isset($config['thumbnails'])) {
             $this->setThumbnails($config['thumbnails']);
         }
+
 
         if (isset($config['fixOrientation'])) {
             $this->fixOrientation = (bool)$config['fixOrientation'];
@@ -199,5 +206,13 @@ class Scenario
     public function shouldFixOrientation()
     {
         return $this->fixOrientation;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isSingleThumbnail()
+    {
+        return $this->isSingleThumbnail;
     }
 }

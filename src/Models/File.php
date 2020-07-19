@@ -162,7 +162,11 @@ class File extends Model
             }
 
             foreach ($scenarioInstance->getThumbnails() as $alias => $thumbnail) {
-                $thumbs[$this->dashesToCamelCase($alias)] = $this->getThumbnailJson($alias);
+                if ($scenarioInstance->isSingleThumbnail() && $alias == 'default') {
+                    $thumbs = $this->getThumbnailJson($alias);
+                } else {
+                    $thumbs[$this->dashesToCamelCase($alias)] = $this->getThumbnailJson($alias);
+                }
             }
         }
 

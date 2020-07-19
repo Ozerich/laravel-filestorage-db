@@ -36,6 +36,11 @@ class StorageConfig
         ]);
     }
 
+    /**
+     * @param null $scenarioName
+     * @return Scenario|null
+     * @throws Exceptions\InvalidConfigException
+     */
     public function getScenarioByName($scenarioName = null)
     {
         if (empty($scenarioName)) {
