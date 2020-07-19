@@ -91,7 +91,7 @@ class File extends Model
 
     private function dashesToCamelCase($string, $capitalizeFirstCharacter = false)
     {
-        $str = str_replace(' - ', '', ucwords($string, ' - '));
+        $str = str_replace('-', '', ucwords($string, '-'));
 
         if (!$capitalizeFirstCharacter) {
             $str = lcfirst($str);
