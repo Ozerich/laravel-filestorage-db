@@ -36,6 +36,8 @@ class ResizeImage
         // *** Get width and height
         $this->width = imagesx($this->image);
         $this->height = imagesy($this->image);
+
+        $this->imageResized = $this->image;
     }
 
     public function getWidth()

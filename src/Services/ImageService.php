@@ -88,17 +88,19 @@ class ImageService
         $width = $thumbnail->getWidth();
         $height = $thumbnail->getHeight();
 
-        if ($is_2x) {
-            $width = $image->getWidth() < ($width * 2) ? max($width, $image->getWidth()) : $width * 2;
-            $height = $image->getWidth() < ($height * 2) ? max($height, $image->getHeight()) : $height * 2;
-        }
+        if($width && $height) {
+            if ($is_2x) {
+                $width = $image->getWidth() < ($width * 2) ? max($width, $image->getWidth()) : $width * 2;
+                $height = $image->getWidth() < ($height * 2) ? max($height, $image->getHeight()) : $height * 2;
+            }
 
-        if ($thumbnail->getCrop()) {
-            $image->resizeImage($width, $height, 'crop', $thumbnail->isForceSize());
-        } else if ($thumbnail->getExact()) {
-            $image->resizeImage($width, $height, 'exact', $thumbnail->isForceSize());
-        } else {
-            $image->resizeImage($width, $height, 'auto', $thumbnail->isForceSize());
+            if ($thumbnail->getCrop()) {
+                $image->resizeImage($width, $height, 'crop', $thumbnail->isForceSize());
+            } else if ($thumbnail->getExact()) {
+                $image->resizeImage($width, $height, 'exact', $thumbnail->isForceSize());
+            } else {
+                $image->resizeImage($width, $height, 'auto', $thumbnail->isForceSize());
+            }
         }
 
         $image->fixExifOrientation();

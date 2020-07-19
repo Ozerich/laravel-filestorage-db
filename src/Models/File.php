@@ -113,7 +113,7 @@ class File extends Model
         $url = $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail);
         $url2x = $thumbnail->is2xSupport() ? $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail, true) : null;
         $url_webp = $thumbnail->isWebpSupport() ? $scenario->getStorage()->getFileUrl($this->hash, 'webp', $thumbnail, false) : null;
-        $url_webp2x = $thumbnail->isWebpSupport() ? $scenario->getStorage()->getFileUrl($this->hash, 'webp', $thumbnail, true) : null;
+        $url_webp2x = $thumbnail->isWebpSupport() && $thumbnail->is2xSupport() ? $scenario->getStorage()->getFileUrl($this->hash, 'webp', $thumbnail, true) : null;
 
         $item = [
             'url' => $url,
@@ -125,7 +125,7 @@ class File extends Model
 
         if ($thumbnail->isWebpSupport()) {
             $item['url_webp'] = $url_webp;
-            if ($thumbnail->isWebpSupport()) {
+            if ($thumbnail->isWebpSupport() && $thumbnail->is2xSupport()) {
                 $item['url_webp_2x'] = $url_webp2x;
             }
         }
