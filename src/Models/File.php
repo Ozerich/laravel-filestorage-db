@@ -100,7 +100,25 @@ class File extends Model
         return $str;
     }
 
+    public function getThumbnailsJson($thumbnails)
+    {
+        $scenarioInstance = Storage::getScenario($this->scenario);
+        if ($scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext) == false) {
+            return null;
+        }
 
+        if (!is_array($thumbnails)) {
+            $thumbnails = [$thumbnails];
+        }
+
+        $result = [];
+        foreach ($thumbnails as $thumbnail) {
+            $result[$this->dashesToCamelCase($thumbnail)] = $this->getThumbnailJson($thumbnail);
+        }
+
+        return $result;
+    }
+    
     public function getThumbnailJson($thumbnailId)
     {
         $scenario = Storage::getScenario($this->scenario);
