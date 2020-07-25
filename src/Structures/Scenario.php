@@ -3,6 +3,7 @@
 namespace Ozerich\FileStorage\Structures;
 
 use Ozerich\FileStorage\Exceptions\InvalidConfigException;
+use Ozerich\FileStorage\Exceptions\InvalidThumbnailException;
 use Ozerich\FileStorage\Storage\BaseStorage;
 use Ozerich\FileStorage\Storage\FileStorage;
 use Ozerich\FileStorage\Validators\Validator;
@@ -112,7 +113,11 @@ class Scenario
      */
     public function getThumbnailByAlias($alias)
     {
-        return isset($this->thumbnails_by_alias[$alias]) ? $this->thumbnails_by_alias[$alias] : null;
+        if (!isset($this->thumbnails_by_alias[$alias])) {
+            throw new InvalidThumbnailException('Thumbnail "' . $alias . '" not found');
+        }
+
+        return $this->thumbnails_by_alias[$alias];
     }
 
     /**

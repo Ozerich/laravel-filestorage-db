@@ -35,7 +35,7 @@ class File extends Model
      * @return \Ozerich\FileStorage\Structures\Scenario
      * @throws InvalidScenarioException
      */
-    private function scenarioInstance()
+    private function scenarionInstance()
     {
         $scenario = Storage::getScenario($this->scenario);
         if (!$scenario) {
@@ -50,7 +50,7 @@ class File extends Model
      */
     public function getAbsolutePath($thumbnail_alias = null)
     {
-        $scenario = $this->scenarioInstance();
+        $scenario = $this->scenarionInstance();
 
         $thumbnail = null;
         if (!empty($thumbnail_alias)) {
@@ -62,7 +62,7 @@ class File extends Model
 
     public function getPath()
     {
-        return $this->scenarioInstance()->getStorage()->getAbsoluteFilePath($this->hash, $this->ext);
+        return $this->scenarionInstance()->getStorage()->getAbsoluteFilePath($this->hash, $this->ext);
     }
 
     public function setScenario($scenario, $regenerateThumbnails = false)
@@ -76,7 +76,7 @@ class File extends Model
         $this->scenario = $scenario;
         $this->save();
 
-        $scenarioInstance = $this->scenarioInstance();
+        $scenarioInstance = $this->scenarionInstance();
 
         $scenarioInstance->getStorage()->upload($oldFilePath, $this->hash, $this->ext);
 
@@ -106,7 +106,7 @@ class File extends Model
 
     public function getThumbnailsJson($thumbnails)
     {
-        $scenarioInstance = $this->scenarioInstance();
+        $scenarioInstance = $this->scenarionInstance();
         if ($scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext) == false) {
             return null;
         }
@@ -123,14 +123,14 @@ class File extends Model
         return $result;
     }
 
-    public function getThumbnailJson($thumbnailId)
+    public function getThumbnailJson($thumbnail, $scenario = null)
     {
-        $scenario = $this->scenarioInstance();
-
-        $thumbnail = $scenario->getThumbnailByAlias($thumbnailId);
-        if (!$thumbnail) {
-            return null;
+        if ($scenario && $this->scenario != $scenario) {
+            $this->setScenario($scenario);
         }
+
+        $scenario = $this->scenarionInstance();
+        $thumbnail = $scenario->getThumbnailByAlias($thumbnail);
 
         $url = $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail);
         $url2x = $thumbnail->is2xSupport() ? $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail, true) : null;
@@ -172,7 +172,7 @@ class File extends Model
             $this->setScenario($scenario);
         }
 
-        $scenarioInstance = $this->scenarioInstance();
+        $scenarioInstance = $this->scenarionInstance();
         if ($scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext) == false) {
             return null;
         }
