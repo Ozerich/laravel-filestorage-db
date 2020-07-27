@@ -5,6 +5,7 @@ namespace Ozerich\FileStorage\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Ozerich\FileStorage\Exceptions\InvalidScenarioException;
+use Ozerich\FileStorage\Exceptions\InvalidThumbnailException;
 use Ozerich\FileStorage\Jobs\PrepareThumbnailsJob;
 use Ozerich\FileStorage\Storage;
 
@@ -89,9 +90,12 @@ class File extends Model
 
     public function getUrl($thumbnail_alias = null)
     {
-        return $this->getAbsolutePath($thumbnail_alias);
+        try {
+            return $this->getAbsolutePath($thumbnail_alias);
+        } catch (InvalidThumbnailException $exception) {
+            return $this->getAbsolutePath();
+        }
     }
-
 
     private function dashesToCamelCase($string, $capitalizeFirstCharacter = false)
     {
