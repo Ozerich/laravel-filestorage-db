@@ -4,7 +4,7 @@ namespace Ozerich\FileStorage\Utils;
 
 class DownloadFile
 {
-    public static function downloadFile($url, $filepath)
+    public static function download($url, $filepath)
     {
         set_time_limit(0);
         $fp = fopen($filepath, 'w+');
