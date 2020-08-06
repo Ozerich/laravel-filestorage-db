@@ -12,6 +12,7 @@ use Ozerich\FileStorage\Services\Random;
 use Ozerich\FileStorage\Services\TempFile;
 use Ozerich\FileStorage\Structures\Scenario;
 use Ozerich\FileStorage\Structures\Thumbnail;
+use Ozerich\FileStorage\Utils\DownloadFile;
 
 class Storage
 {
@@ -32,6 +33,61 @@ class Storage
     public function getUploadError()
     {
         return $this->uploadError;
+    }
+
+    public function createFromUrl($url, $scenario = null)
+    {
+        if (!empty($scenario)) {
+            $scenarioInstance = $this->config->getScenarioByName($scenario);
+            if (!$scenario) {
+                $this->uploadError = 'Invalid scenario';
+                return null;
+            }
+        } else {
+            $scenarioInstance = $this->config->getDefaultScenario();
+            if (!$scenarioInstance) {
+                $this->uploadError = 'Cannot create default scenario, it seems that defaultStorage is not set in config filestorage.php';
+                return null;
+            }
+        }
+
+        $p = strrpos($url, '?');
+        if ($p !== false) {
+            $url_without_params = substr($url, 0, $p);
+        } else {
+            $url_without_params = $url;
+        }
+
+        $file_name = $file_ext = null;
+
+        $p = strrpos($url_without_params, '.');
+        if ($p !== null) {
+            $file_ext = substr($url_without_params, $p + 1);
+
+            $p = strrpos($url_without_params, '/');
+            if ($p !== false) {
+                $file_name = substr($url_without_params, $p + 1);
+            }
+        }
+
+        if (strlen($file_ext) > 4) {
+            $file_ext = null;
+        }
+
+        $temp = new TempFile();
+
+        try {
+            DownloadFile::download($url, $temp->getPath());
+        } catch (\Exception $ex) {
+            return null;
+        }
+
+        if (!$file_ext) {
+            $mime = mime_content_type($temp->getPath());
+            $file_ext = ImageService::mime2ext($mime);
+        }
+
+        return $this->createFile($temp->getPath(), $file_name, $file_ext, $scenarioInstance);
     }
 
     public function createFromRequest($scenario = null, $requestFieldName = 'file')
