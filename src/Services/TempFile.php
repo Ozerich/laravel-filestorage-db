@@ -4,7 +4,7 @@ namespace Ozerich\FileStorage\Services;
 
 class TempFile
 {
-    static $tmpFolder = null;
+    static $tmpFolder = '/tmp';
 
     /** @var string */
     private $filename;
