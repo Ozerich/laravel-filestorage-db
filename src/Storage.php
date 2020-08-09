@@ -106,7 +106,12 @@ class Storage
             }
         }
 
-        list($meta, $content) = explode(';', $base64Data);
+        if (strpos($base64Data, ';') !== false) {
+            list($meta, $content) = explode(';', $base64Data);
+        } else {
+            $meta = null;
+            $content = $base64Data;
+        }
 
         $p = strpos($content, ',');
         if ($p !== false) {
@@ -121,7 +126,7 @@ class Storage
             if (count($file_ext_data) > 1) {
                 $file_ext = $file_ext_data[count($file_ext_data) - 1];
             }
-        } else {
+        } else if ($meta) {
             $mime_type = substr($meta, 5);
             $file_ext = ImageService::mime2ext($mime_type);
         }
