@@ -39,7 +39,7 @@ class Storage
     {
         if (!empty($scenario)) {
             $scenarioInstance = $this->config->getScenarioByName($scenario);
-            if (!$scenario) {
+            if (!$scenarioInstance) {
                 $this->uploadError = 'Invalid scenario';
                 return null;
             }
@@ -90,6 +90,48 @@ class Storage
         return $this->createFile($temp->getPath(), $file_name, $file_ext, $scenarioInstance);
     }
 
+    public function createFromBase64($base64Data, $fileName, $scenario = null)
+    {
+        if (!empty($scenario)) {
+            $scenarioInstance = $this->config->getScenarioByName($scenario);
+            if (!$scenarioInstance) {
+                $this->uploadError = 'Invalid scenario';
+                return null;
+            }
+        } else {
+            $scenarioInstance = $this->config->getDefaultScenario();
+            if (!$scenarioInstance) {
+                $this->uploadError = 'Cannot create default scenario, it seems that defaultStorage is not set in config filestorage.php';
+                return null;
+            }
+        }
+
+        list($meta, $content) = explode(';', $base64Data);
+
+        $p = strpos($content, ',');
+        if ($p !== false) {
+            $content = substr($content, $p + 1);
+        }
+
+        $image_raw = base64_decode($content);
+        $file_ext = null;
+
+        if (!empty($fileName)) {
+            $file_ext_data = explode('.', $fileName);
+            if (count($file_ext_data) > 1) {
+                $file_ext = $file_ext_data[count($file_ext_data) - 1];
+            }
+        } else {
+            $mime_type = substr($meta, 5);
+            $file_ext = ImageService::mime2ext($mime_type);
+        }
+
+        $temp = new TempFile();
+        $temp->write($image_raw);
+
+        return $this->createFile($temp->getPath(), $fileName, $file_ext, $scenarioInstance);
+    }
+
     public function createFromRequest($scenario = null, $requestFieldName = 'file')
     {
         /** @var Request $request */
@@ -103,7 +145,7 @@ class Storage
 
         if (!empty($scenario)) {
             $scenarioInstance = $this->config->getScenarioByName($scenario);
-            if (!$scenario) {
+            if (!$scenarioInstance) {
                 $this->uploadError = 'Invalid scenario';
                 return null;
             }
