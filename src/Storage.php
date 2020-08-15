@@ -35,6 +35,33 @@ class Storage
         return $this->uploadError;
     }
 
+    public function createFromLocalFile($path, $scenario = null)
+    {
+        if (!empty($scenario)) {
+            $scenarioInstance = $this->config->getScenarioByName($scenario);
+            if (!$scenarioInstance) {
+                $this->uploadError = 'Invalid scenario';
+                return null;
+            }
+        } else {
+            $scenarioInstance = $this->config->getDefaultScenario();
+            if (!$scenarioInstance) {
+                $this->uploadError = 'Cannot create default scenario, it seems that defaultStorage is not set in config filestorage.php';
+                return null;
+            }
+        }
+
+        $slashPos = mb_strrpos($path, '/');
+        if ($slashPos === false) {
+            return null;
+        }
+        $fileName = mb_substr($path, $slashPos + 1);
+        $p = mb_strrpos($fileName, '.');
+        $fileExt = $p === false ? null : mb_substr($fileName, $p + 1);
+
+        return $this->createFile($path, $fileName, $fileExt, $scenarioInstance);
+    }
+
     public function createFromUrl($url, $scenario = null)
     {
         if (!empty($scenario)) {
