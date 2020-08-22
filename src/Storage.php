@@ -298,4 +298,13 @@ class Storage
         $model->setScenario($scenario, true);
         return $model;
     }
+
+    public function sendDownloadFileResponse(File $file)
+    {
+        header('Content-Type: ' . $file->mime);
+        header("Content-Transfer-Encoding: Binary");
+        header("Content-disposition: attachment; filename=\"" . basename($file->name) . "\"");
+        readfile($file->getPath());
+        exit;
+    }
 }
