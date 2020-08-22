@@ -121,7 +121,12 @@ class File extends Model
 
         $result = [];
         foreach ($thumbnails as $thumbnail) {
-            $result[$this->dashesToCamelCase($thumbnail)] = $this->getThumbnailJson($thumbnail);
+            try {
+                $value = $this->getThumbnailJson($thumbnail);
+            } catch (InvalidThumbnailException $exception) {
+                $value = null;
+            }
+            $result[$this->dashesToCamelCase($thumbnail)] = $value;
         }
 
         return $result;
