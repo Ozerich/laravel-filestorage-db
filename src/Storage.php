@@ -59,7 +59,10 @@ class Storage
         $p = mb_strrpos($fileName, '.');
         $fileExt = $p === false ? null : mb_substr($fileName, $p + 1);
 
-        return $this->createFile($path, $fileName, $fileExt, $scenarioInstance);
+        $temp = new TempFile();
+        $temp->from($path);
+
+        return $this->createFile($temp->getPath(), $fileName, $fileExt, $scenarioInstance);
     }
 
     public function createFromUrl($url, $scenario = null)

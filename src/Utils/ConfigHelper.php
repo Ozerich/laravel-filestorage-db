@@ -2,6 +2,8 @@
 
 namespace Ozerich\FileStorage\Utils;
 
+use Ozerich\FileStorage\Exceptions\InvalidConfigException;
+
 class ConfigHelper
 {
     public static function defaultValidator($maxSizeMB = 50)
@@ -63,6 +65,14 @@ class ConfigHelper
 
     public static function thumbWithWebp($width = null, $height = null, $crop = false, $exact = false, $force = false, $quality = null)
     {
+        if ($crop && $exact) {
+            throw new InvalidConfigException('Invalid thumbnail: can not be CROP and EXACT at the same time');
+        }
+
+        if ($force && (!$width || !$height)) {
+            throw new InvalidConfigException('Invalid thumbnail: for using FORCE mode you must specify width and height');
+        }
+
         return [
             'width' => $width,
             'height' => $height,
@@ -77,6 +87,14 @@ class ConfigHelper
 
     public static function thumbWith2x($width = null, $height = null, $crop = false, $exact = false, $force = false, $quality = null)
     {
+        if ($crop && $exact) {
+            throw new InvalidConfigException('Invalid thumbnail: can not be CROP and EXACT at the same time');
+        }
+
+        if ($force && (!$width || !$height)) {
+            throw new InvalidConfigException('Invalid thumbnail: for using FORCE mode you must specify width and height');
+        }
+
         return [
             'width' => $width,
             'height' => $height,
@@ -91,12 +109,22 @@ class ConfigHelper
 
     public static function thumbWithWebpAnd2x($width, $height, $crop = true, $exact = false, $force = false, $quality = null)
     {
+        if ($crop && $exact) {
+            throw new InvalidConfigException('Invalid thumbnail: can not be CROP and EXACT at the same time');
+        }
+
+        if ($force && (!$width || !$height)) {
+            throw new InvalidConfigException('Invalid thumbnail: for using FORCE mode you must specify width and height');
+        }
+
         return [
             'width' => $width,
             'height' => $height,
-            'crop' => true,
+            'crop' => $crop,
+            'exact' => $exact,
             '2x' => true,
             'webp' => true,
+            'force' => $force,
             'quality' => $quality
         ];
     }

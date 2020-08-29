@@ -84,6 +84,23 @@ class ResizeImage
         return null;
     }
 
+    private function initCanvas($width, $height)
+    {
+        $this->imageResized = imagecreatetruecolor($width, $height);
+        imagealphablending($this->imageResized, false);
+        imagesavealpha($this->imageResized, true);
+
+        if ($this->image_type == IMAGETYPE_PNG) {
+            $bgColor = imagecolorallocatealpha($this->imageResized, 0, 0, 0, 127);
+        } else {
+            $bgColor = imagecolorallocate($this->imageResized, 255, 255, 255);
+        }
+
+        imagefill($this->imageResized, 0, 0, $bgColor);
+
+        return $this->imageResized;
+    }
+
     ## --------------------------------------------------------
 
     public function resizeImage($newWidth, $newHeight, $option = "auto", $forceSize = false)
@@ -92,22 +109,13 @@ class ResizeImage
             return;
         }
 
-        // *** Get optimal width and height - based on $option
         $optionArray = $this->getDimensions($newWidth, $newHeight, $option, $forceSize);
+        list ($optimalWidth, $optimalHeight) = $optionArray;
 
-        $optimalWidth = $optionArray['optimalWidth'];
-        $optimalHeight = $optionArray['optimalHeight'];
-
-        // *** Resample - create image canvas of x, y size
-
-        $this->imageResized = imagecreatetruecolor($optimalWidth, $optimalHeight);
-        imagealphablending($this->imageResized, false);
-        imagesavealpha($this->imageResized, true);
-
+        $this->initCanvas($optimalWidth, $optimalHeight);
         imagecopyresampled($this->imageResized, $this->image, 0, 0, 0, 0, $optimalWidth, $optimalHeight, $this->width, $this->height);
 
-        // *** if option is 'crop', then crop too
-        if ($option == 'crop') {
+        if ($option == 'crop' && $newWidth && $newHeight) {
             $this->crop($optimalWidth, $optimalHeight, $newWidth, $newHeight, $forceSize);
         }
     }
@@ -160,7 +168,7 @@ class ResizeImage
             }
         }
 
-        return array('optimalWidth' => ceil($optimalWidth), 'optimalHeight' => ceil($optimalHeight));
+        return [ceil($optimalWidth), ceil($optimalHeight)];
     }
 
     ## --------------------------------------------------------
@@ -227,16 +235,20 @@ class ResizeImage
     }
 
     ## --------------------------------------------------------
-
     private function crop($optimalWidth, $optimalHeight, $newWidth, $newHeight, $forceSize = false)
     {
-        if (!$forceSize) {
-            if ($newHeight > $this->height) {
+        if ($forceSize == false) {
+
+            if ($optimalWidth < $newWidth && $optimalHeight < $newHeight) {
+                return;
+            }
+
+            if (!$newWidth || $newHeight > $this->height) {
                 $newWidth /= ($newHeight / $this->height);
                 $newHeight = $this->height;
             }
 
-            if ($newWidth > $this->width) {
+            if (!$newHeight || $newWidth > $this->width) {
                 $newHeight /= ($newWidth / $this->width);
                 $newWidth = $this->width;
             }
@@ -246,15 +258,18 @@ class ResizeImage
         $cropStartX = max(0, ((int)$optimalWidth - $newWidth) / 2);
         $cropStartY = max(0, ((int)$optimalHeight - $newHeight) / 2);
 
-        $crop = $this->imageResized;
+        $old = $this->imageResized;
 
         // *** Now crop from center to exact requested size
 
-        $this->imageResized = imagecreatetruecolor($newWidth, $newHeight);
-        imagealphablending($this->imageResized, false);
-        imagesavealpha($this->imageResized, true);
+        $this->imageResized = $this->initCanvas($newWidth, $newHeight);
 
-        imagecopyresampled($this->imageResized, $crop, 0, 0, $cropStartX, $cropStartY, $newWidth, $newHeight, $newWidth, $newHeight);
+        imagecopyresampled(
+            $this->imageResized, $old,
+            0, 0, $cropStartX, $cropStartY,
+            $newWidth, $newHeight,
+            $newWidth, $newHeight
+        );
     }
 
     public function saveImage($savePath, $imageQuality = 100)

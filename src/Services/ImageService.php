@@ -88,10 +88,10 @@ class ImageService
         $width = $thumbnail->getWidth();
         $height = $thumbnail->getHeight();
 
-        if($width && $height) {
+        if ($width || $height) {
             if ($is_2x) {
-                $width = $image->getWidth() < ($width * 2) ? max($width, $image->getWidth()) : $width * 2;
-                $height = $image->getWidth() < ($height * 2) ? max($height, $image->getHeight()) : $height * 2;
+                $width = $width ? ($image->getWidth() < ($width * 2) ? max($width, $image->getWidth()) : $width * 2) : null;
+                $height = $height ? ($image->getWidth() < ($height * 2) ? max($height, $image->getHeight()) : $height * 2) : null;
             }
 
             if ($thumbnail->getCrop()) {
