@@ -11,15 +11,18 @@ class ConfigHelper
         return [
             'maxSize' => $maxSizeMB * 1024 * 1024,
             'checkExtensionByMimeType' => true,
-            'extensions' => ['jpg', 'jpeg', 'png', 'zip', 'docx', 'pdf', 'doc', 'rar', 'xls', 'xlsx', 'pptx', 'ppt', 'gif', 'mp4']
+            'extensions' => ['jpg', 'jpeg', 'png', 'zip', 'docx', 'pdf', 'doc', 'rar', 'xls', 'xlsx', 'pptx', 'ppt', 'gif', 'mp4', 'svg']
         ];
     }
 
-    public static function imageValidator($maxSizeMB = 50, $includeGif = false)
+    public static function imageValidator($maxSizeMB = 50, $includeGif = false, $includeSvg = true)
     {
         $extensions = ['jpg', 'jpeg', 'png'];
         if ($includeGif) {
             $extensions[] = 'gif';
+        }
+        if ($includeSvg) {
+            $extensions[] = 'svg';
         }
 
         return [
@@ -107,7 +110,7 @@ class ConfigHelper
         ];
     }
 
-    public static function thumbWithWebpAnd2x($width, $height, $crop = true, $exact = false, $force = false, $quality = null)
+    public static function thumbWithWebpAnd2x($width = null, $height = null, $crop = true, $exact = false, $force = false, $quality = null)
     {
         if ($crop && $exact) {
             throw new InvalidConfigException('Invalid thumbnail: can not be CROP and EXACT at the same time');
