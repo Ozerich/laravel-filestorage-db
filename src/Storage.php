@@ -276,7 +276,10 @@ class Storage
     public static function staticDeleteThumbnails(File $file, ?Thumbnail $thumbnail = null)
     {
         $scenario = (new StorageConfig())->getScenarioByName($file->scenario);
-        $scenario->getStorage()->deleteAllThumbnails($file->hash);
+
+        if ($scenario) {
+            $scenario->getStorage()->deleteAllThumbnails($file->hash);
+        }
     }
 
     public static function staticPrepareThumbnails(File $file, ?Thumbnail $thumbnail = null, $forceRegenerate = false)
