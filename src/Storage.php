@@ -288,7 +288,12 @@ class Storage
             self::staticDeleteThumbnails($file, $thumbnail);
         }
 
-        return ImageService::prepareThumbnails($file, (new StorageConfig())->getScenarioByName($file->scenario), $thumbnail);
+        $scenario = (new StorageConfig())->getScenarioByName($file->scenario);
+        if (!$scenario) {
+            return;
+        }
+
+        return ImageService::prepareThumbnails($file, $scenario, $thumbnail);
     }
 
     public function setFileScenario($fileId, $scenario)
