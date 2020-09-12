@@ -15,16 +15,18 @@ class ConfigHelper
         return [
             'maxSize' => $maxSizeMB * 1024 * 1024,
             'checkExtensionByMimeType' => true,
-            'extensions' => ['jpg', 'jpeg', 'png', 'zip', 'docx', 'pdf', 'doc', 'rar', 'xls', 'xlsx', 'pptx', 'ppt', 'gif', 'mp4', 'svg']
+            'extensions' => ['jpg', 'jpeg', 'png', 'zip', 'docx', 'pdf', 'doc', 'rar', 'xls', 'xlsx', 'pptx', 'ppt', 'gif', 'mp4', 'svg', 'fig', 'psd', 'txt']
         ];
     }
 
     public static function imageValidator($maxSizeMB = 50, $includeGif = false, $includeSvg = true)
     {
         $extensions = ['jpg', 'jpeg', 'png'];
+
         if ($includeGif) {
             $extensions[] = 'gif';
         }
+
         if ($includeSvg) {
             $extensions[] = 'svg';
         }
@@ -51,7 +53,7 @@ class ConfigHelper
         return self::fileStorage('tmp');
     }
 
-    private static function validate($width, $height, $mode)
+    private static function validateThumb($width, $height, $mode)
     {
         if ($mode == self::MODE_CROP) {
             if (!$width || !$height) {
@@ -68,7 +70,7 @@ class ConfigHelper
 
     public static function thumb($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = true, $quality = null)
     {
-        self::validate($width, $height, $mode);
+        self::validateThumb($width, $height, $mode);
 
         return [
             'width' => $width,
@@ -77,6 +79,54 @@ class ConfigHelper
             '2x' => false,
             'crop' => $mode == self::MODE_CROP,
             'exact' => $mode == self::MODE_EXACT,
+            'force' => $forceResize,
+            'quality' => $quality
+        ];
+    }
+
+    public static function thumbWithWebp($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = false, $quality = null)
+    {
+        self::validateThumb($width, $height, $mode);
+
+        return [
+            'width' => $width,
+            'height' => $height,
+            'webp' => true,
+            '2x' => false,
+            'crop' => $mode == self::MODE_CROP,
+            'exact' => $mode == self::MODE_EXACT,
+            'force' => $forceResize,
+            'quality' => $quality
+        ];
+    }
+
+    public static function thumbWith2x($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = true, $quality = null)
+    {
+        self::validateThumb($width, $height, $mode);
+
+        return [
+            'width' => $width,
+            'height' => $height,
+            'webp' => false,
+            '2x' => true,
+            'crop' => $mode == self::MODE_CROP,
+            'exact' => $mode == self::MODE_EXACT,
+            'force' => $forceResize,
+            'quality' => $quality
+        ];
+    }
+
+    public static function thumbWithWebpAnd2x($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = true, $quality = null)
+    {
+        self::validateThumb($width, $height, $mode);
+
+        return [
+            'width' => $width,
+            'height' => $height,
+            'crop' => $mode == self::MODE_CROP,
+            'exact' => $mode == self::MODE_EXACT,
+            '2x' => true,
+            'webp' => true,
             'force' => $forceResize,
             'quality' => $quality
         ];
@@ -104,53 +154,5 @@ class ConfigHelper
                 'mobile' => self::thumbWithWebpAnd2x(425, null, self::MODE_AUTO, false),
             ];
         }
-    }
-
-    public static function thumbWithWebp($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = false, $quality = null)
-    {
-        self::validate($width, $height, $mode);
-
-        return [
-            'width' => $width,
-            'height' => $height,
-            'webp' => true,
-            '2x' => false,
-            'crop' => $mode == self::MODE_CROP,
-            'exact' => $mode == self::MODE_EXACT,
-            'force' => $forceResize,
-            'quality' => $quality
-        ];
-    }
-
-    public static function thumbWith2x($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = true, $quality = null)
-    {
-        self::validate($width, $height, $mode);
-
-        return [
-            'width' => $width,
-            'height' => $height,
-            'webp' => false,
-            '2x' => true,
-            'crop' => $mode == self::MODE_CROP,
-            'exact' => $mode == self::MODE_EXACT,
-            'force' => $forceResize,
-            'quality' => $quality
-        ];
-    }
-
-    public static function thumbWithWebpAnd2x($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = true, $quality = null)
-    {
-        self::validate($width, $height, $mode);
-
-        return [
-            'width' => $width,
-            'height' => $height,
-            'crop' => $mode == self::MODE_CROP,
-            'exact' => $mode == self::MODE_EXACT,
-            '2x' => true,
-            'webp' => true,
-            'force' => $forceResize,
-            'quality' => $quality
-        ];
     }
 }
