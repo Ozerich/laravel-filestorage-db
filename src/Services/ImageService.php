@@ -90,9 +90,6 @@ class ImageService
 
         if ($width || $height) {
             if ($is_2x) {
-               // $width = $width ? ($image->getWidth() < ($width * 2) ? max($width, $image->getWidth()) : $width * 2) : null;
-               // $height = $height ? ($image->getHeight() < ($height * 2) ? max($height, $image->getHeight()) : $height * 2) : null;
-
                 $width = $width ? $width * 2 : null;
                 $height = $height ? $height * 2 : null;
             }

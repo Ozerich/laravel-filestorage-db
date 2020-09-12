@@ -109,8 +109,9 @@ class ResizeImage
             return;
         }
 
-        $optionArray = $this->getDimensions($newWidth, $newHeight, $option == 'crop' ? 'auto' : $option, $forceSize);
+        $optionArray = $this->getDimensions($newWidth, $newHeight, $option, $forceSize);
         list ($optimalWidth, $optimalHeight) = $optionArray;
+
 
         $this->initCanvas($optimalWidth, $optimalHeight);
         imagecopyresampled($this->imageResized, $this->image, 0, 0, 0, 0, $optimalWidth, $optimalHeight, $this->width, $this->height);
@@ -189,11 +190,11 @@ class ResizeImage
 
     private function getSizeByAuto($newWidth, $newHeight)
     {
-        if ($this->height < $this->width) // *** Image to be resized is wider (landscape)
+        if ($this->height > $this->width) // *** Image to be resized is wider (landscape)
         {
             $optimalWidth = $newWidth;
             $optimalHeight = $this->getSizeByFixedWidth($newWidth);
-        } elseif ($this->height > $this->width) // *** Image to be resized is taller (portrait)
+        } elseif ($this->height < $this->width) // *** Image to be resized is taller (portrait)
         {
             $optimalWidth = $this->getSizeByFixedHeight($newHeight);
             $optimalHeight = $newHeight;
