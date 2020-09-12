@@ -190,27 +190,15 @@ class ResizeImage
 
     private function getSizeByAuto($newWidth, $newHeight)
     {
-        if ($newHeight > $newWidth) // *** Image to be resized is wider (landscape)
-        {
+        if ($newHeight > $newWidth) {
             $optimalWidth = $newWidth;
             $optimalHeight = $this->getSizeByFixedWidth($newWidth);
-        } elseif ($newHeight < $newWidth) // *** Image to be resized is taller (portrait)
-        {
+        } elseif ($newHeight < $newWidth) {
             $optimalWidth = $this->getSizeByFixedHeight($newHeight);
             $optimalHeight = $newHeight;
-        } else // *** Image to be resizerd is a square
-        {
-            if ($newHeight < $newWidth) {
-                $optimalWidth = $newWidth;
-                $optimalHeight = $this->getSizeByFixedWidth($newWidth);
-            } else if ($newHeight > $newWidth) {
-                $optimalWidth = $this->getSizeByFixedHeight($newHeight);
-                $optimalHeight = $newHeight;
-            } else {
-                // *** Sqaure being resized to a square
-                $optimalWidth = $newWidth;
-                $optimalHeight = $newHeight;
-            }
+        } else {
+            $optimalWidth = $newWidth;
+            $optimalHeight = $newHeight;
         }
 
         return array('optimalWidth' => $optimalWidth, 'optimalHeight' => $optimalHeight);
