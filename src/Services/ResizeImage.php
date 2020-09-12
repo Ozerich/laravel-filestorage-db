@@ -190,11 +190,11 @@ class ResizeImage
 
     private function getSizeByAuto($newWidth, $newHeight)
     {
-        if ($this->height > $this->width) // *** Image to be resized is wider (landscape)
+        if ($newHeight > $newWidth) // *** Image to be resized is wider (landscape)
         {
             $optimalWidth = $newWidth;
             $optimalHeight = $this->getSizeByFixedWidth($newWidth);
-        } elseif ($this->height < $this->width) // *** Image to be resized is taller (portrait)
+        } elseif ($newHeight < $newWidth) // *** Image to be resized is taller (portrait)
         {
             $optimalWidth = $this->getSizeByFixedHeight($newHeight);
             $optimalHeight = $newHeight;
