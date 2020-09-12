@@ -87,6 +87,25 @@ class ConfigHelper
         return self::thumb(1200, 630, false, true);
     }
 
+    public static function backgroundThumbnails($use2x = false)
+    {
+        if ($use2x == false) {
+            return [
+                'desktop' => self::thumbWithWebp(1920, null, self::MODE_AUTO, false),
+                'laptop' => self::thumbWithWebp(1500, null, self::MODE_AUTO, false),
+                'tablet' => self::thumbWithWebp(1024, null, self::MODE_AUTO, false),
+                'mobile' => self::thumbWithWebp(425, null, self::MODE_AUTO, false),
+            ];
+        } else {
+            return [
+                'desktop' => self::thumbWithWebpAnd2x(1920, null, self::MODE_AUTO, false),
+                'laptop' => self::thumbWithWebpAnd2x(1500, null, self::MODE_AUTO, false),
+                'tablet' => self::thumbWithWebpAnd2x(1024, null, self::MODE_AUTO, false),
+                'mobile' => self::thumbWithWebpAnd2x(425, null, self::MODE_AUTO, false),
+            ];
+        }
+    }
+
     public static function thumbWithWebp($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = false, $quality = null)
     {
         self::validate($width, $height, $mode);
