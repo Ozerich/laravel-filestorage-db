@@ -6,6 +6,10 @@ use Ozerich\FileStorage\Exceptions\InvalidConfigException;
 
 class ConfigHelper
 {
+    const MODE_AUTO = 'AUTO';
+    const MODE_EXACT = 'EXACT';
+    const MODE_CROP = 'CROP';
+
     public static function defaultValidator($maxSizeMB = 50)
     {
         return [
@@ -47,16 +51,33 @@ class ConfigHelper
         return self::fileStorage('tmp');
     }
 
-    public static function thumb($width = null, $height = null, $crop = false, $exact = false, $force = false, $quality = null)
+    private static function validate($width, $height, $mode)
     {
+        if ($mode == self::MODE_CROP) {
+            if (!$width || !$height) {
+                throw new InvalidConfigException('You must specify width and height when you use CROP mode');
+            }
+        }
+
+        if ($mode == self::MODE_EXACT) {
+            if (!$width || !$height) {
+                throw new InvalidConfigException('You must specify width and height when you use EXACT mode');
+            }
+        }
+    }
+
+    public static function thumb($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = true, $quality = null)
+    {
+        self::validate($width, $height, $mode);
+
         return [
             'width' => $width,
             'height' => $height,
             'webp' => false,
             '2x' => false,
-            'crop' => $crop,
-            'exact' => $exact,
-            'force' => $force,
+            'crop' => $mode == self::MODE_CROP,
+            'exact' => $mode == self::MODE_EXACT,
+            'force' => $forceResize,
             'quality' => $quality
         ];
     }
@@ -66,68 +87,50 @@ class ConfigHelper
         return self::thumb(1200, 630, false, true);
     }
 
-    public static function thumbWithWebp($width = null, $height = null, $crop = false, $exact = false, $force = false, $quality = null)
+    public static function thumbWithWebp($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = false, $quality = null)
     {
-        if ($crop && $exact) {
-            throw new InvalidConfigException('Invalid thumbnail: can not be CROP and EXACT at the same time');
-        }
-
-        if ($force && (!$width || !$height)) {
-            throw new InvalidConfigException('Invalid thumbnail: for using FORCE mode you must specify width and height');
-        }
+        self::validate($width, $height, $mode);
 
         return [
             'width' => $width,
             'height' => $height,
             'webp' => true,
             '2x' => false,
-            'crop' => $crop,
-            'exact' => $exact,
-            'force' => $force,
+            'crop' => $mode == self::MODE_CROP,
+            'exact' => $mode == self::MODE_EXACT,
+            'force' => $forceResize,
             'quality' => $quality
         ];
     }
 
-    public static function thumbWith2x($width = null, $height = null, $crop = false, $exact = false, $force = false, $quality = null)
+    public static function thumbWith2x($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = true, $quality = null)
     {
-        if ($crop && $exact) {
-            throw new InvalidConfigException('Invalid thumbnail: can not be CROP and EXACT at the same time');
-        }
-
-        if ($force && (!$width || !$height)) {
-            throw new InvalidConfigException('Invalid thumbnail: for using FORCE mode you must specify width and height');
-        }
+        self::validate($width, $height, $mode);
 
         return [
             'width' => $width,
             'height' => $height,
             'webp' => false,
             '2x' => true,
-            'crop' => $crop,
-            'exact' => $exact,
-            'force' => $force,
+            'crop' => $mode == self::MODE_CROP,
+            'exact' => $mode == self::MODE_EXACT,
+            'force' => $forceResize,
             'quality' => $quality
         ];
     }
 
-    public static function thumbWithWebpAnd2x($width = null, $height = null, $crop = true, $exact = false, $force = false, $quality = null)
+    public static function thumbWithWebpAnd2x($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = true, $quality = null)
     {
-        if ($crop && $exact) {
-            throw new InvalidConfigException('Invalid thumbnail: can not be CROP and EXACT at the same time');
-        }
-
-        if ($force && (!$width || !$height)) {
-            throw new InvalidConfigException('Invalid thumbnail: for using FORCE mode you must specify width and height');
-        }
+        self::validate($width, $height, $mode);
 
         return [
             'width' => $width,
             'height' => $height,
-            'crop' => $crop,
-            'exact' => $exact,
+            'crop' => $mode == self::MODE_CROP,
+            'exact' => $mode == self::MODE_EXACT,
             '2x' => true,
             'webp' => true,
-            'force' => $force,
+            'force' => $forceResize,
             'quality' => $quality
         ];
     }

@@ -109,14 +109,14 @@ class ResizeImage
             return;
         }
 
-        $optionArray = $this->getDimensions($newWidth, $newHeight, $option, $forceSize);
+        $optionArray = $this->getDimensions($newWidth, $newHeight, $option == 'crop' ? 'auto' : $option, $forceSize);
         list ($optimalWidth, $optimalHeight) = $optionArray;
 
         $this->initCanvas($optimalWidth, $optimalHeight);
         imagecopyresampled($this->imageResized, $this->image, 0, 0, 0, 0, $optimalWidth, $optimalHeight, $this->width, $this->height);
 
-        if ($option == 'crop' && $newWidth && $newHeight) {
-            $this->crop($optimalWidth, $optimalHeight, $newWidth, $newHeight, $forceSize);
+        if ($newWidth || $newHeight) {
+            $this->crop($optimalWidth, $optimalHeight, $newWidth, $newHeight, $forceSize, $option == 'auto');
         }
     }
 
@@ -235,7 +235,7 @@ class ResizeImage
     }
 
     ## --------------------------------------------------------
-    private function crop($optimalWidth, $optimalHeight, $newWidth, $newHeight, $forceSize = false)
+    private function crop($optimalWidth, $optimalHeight, $newWidth, $newHeight, $forceSize = false, $startFromZero = false)
     {
         if ($forceSize == false) {
 
@@ -254,9 +254,21 @@ class ResizeImage
             }
         }
 
-        // *** Find center - this will be used for the crop
-        $cropStartX = max(0, ((int)$optimalWidth - $newWidth) / 2);
-        $cropStartY = max(0, ((int)$optimalHeight - $newHeight) / 2);
+        if ($startFromZero) {
+            $cropStartX = 0;
+            $cropStartY = 0;
+        } else {
+            $cropStartX = max(0, ((int)$optimalWidth - $newWidth) / 2);
+            $cropStartY = max(0, ((int)$optimalHeight - $newHeight) / 2);
+        }
+
+        if (!$newWidth) {
+            $newWidth = $optimalWidth;
+        }
+
+        if (!$newHeight) {
+            $newHeight = $optimalHeight;
+        }
 
         $old = $this->imageResized;
 
