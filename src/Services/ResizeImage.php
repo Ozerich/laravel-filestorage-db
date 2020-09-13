@@ -191,10 +191,13 @@ class ResizeImage
 
     private function getSizeByAuto($newWidth, $newHeight)
     {
-        if ($newHeight < $newWidth) {
+        $widthK = $newWidth / $this->width;
+        $heightK = $newHeight / $this->height;
+
+        if ($widthK > $heightK) {
             $optimalWidth = $newWidth;
             $optimalHeight = $this->getSizeByFixedWidth($newWidth);
-        } elseif ($newHeight > $newWidth) {
+        } elseif ($widthK < $heightK) {
             $optimalWidth = $this->getSizeByFixedHeight($newHeight);
             $optimalHeight = $newHeight;
         } else {
