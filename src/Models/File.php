@@ -63,21 +63,27 @@ class File extends Model
 
     public function getPath()
     {
-        return $this->scenarioInstance()->getStorage()->getAbsoluteFilePath($this->hash, $this->ext);
+        try {
+            $scenario = $this->scenarioInstance();
+        } catch (InvalidScenarioException $exception) {
+            return null;
+        }
+
+        return $scenario->getStorage()->getAbsoluteFilePath($this->hash, $this->ext);
     }
 
     public function setScenario($scenario, $regenerateThumbnails = false)
     {
-        $oldFilePath = $this->getPath();
-
         if ($this->scenario == $scenario) {
             return $this;
         }
 
-        $this->scenario = $scenario;
-        $this->save();
+        $oldFilePath = $this->getPath();
+        
+        $scenarioInstance = Storage::getScenario($scenario, true);
 
-        $scenarioInstance = $this->scenarioInstance();
+        $this->scenario = $scenarioInstance->getId();
+        $this->save();
 
         $scenarioInstance->getStorage()->upload($oldFilePath, $this->hash, $this->ext);
 

@@ -25,9 +25,16 @@ class Storage
         $this->config = new StorageConfig();
     }
 
-    public static function getScenario($scenario)
+    public static function getScenario($scenario, $returnDefaultIfNotFound = false)
     {
-        return (new StorageConfig())->getScenarioByName($scenario);
+        $config = new StorageConfig();
+
+        $result = $config->getScenarioByName($scenario);
+        if (!$result && $returnDefaultIfNotFound) {
+            $result = $config->getDefaultScenario();
+        }
+
+        return $result;
     }
 
     public function getUploadError()
