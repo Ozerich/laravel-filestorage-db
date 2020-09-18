@@ -103,21 +103,24 @@ class ImageService
                     }
 
                     if ($width && $height) {
-                        if ($width > $image->getWidth()) {
-                            $k = $width / $image->getWidth();
-                            $width = $image->getWidth();
+                        $imageWidth = ceil(max($width / 2, $image->getWidth()));
+                        $imageHeight = ceil(max($height / 2, $image->getHeight()));
+
+                        if ($width > $imageWidth) {
+                            $k = $width / $imageWidth;
+                            $width = $imageWidth;
                             $height = ceil($height / $k);
                         }
 
-                        if ($height > $image->getHeight()) {
-                            $k = $height / $image->getHeight();
-                            $height = $image->getHeight();
+                        if ($height > $imageHeight) {
+                            $k = $height / $imageHeight;
+                            $height = $imageHeight;
                             $width = ceil($width / $k);
                         }
 
-                        if ($width > $image->getWidth()) {
-                            $k = $width / $image->getWidth();
-                            $width = $image->getWidth();
+                        if ($width > $imageWidth) {
+                            $k = $width / $imageWidth;
+                            $width = $imageWidth;
                             $height = ceil($height / $k);
                         }
                     }
