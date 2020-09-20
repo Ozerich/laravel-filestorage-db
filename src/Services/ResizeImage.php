@@ -96,6 +96,7 @@ class ResizeImage
             $bgColor = imagecolorallocate($this->imageResized, 255, 255, 255);
         }
 
+
         imagefill($this->imageResized, 0, 0, $bgColor);
 
         return $this->imageResized;
@@ -105,13 +106,10 @@ class ResizeImage
 
     public function resizeImage($newWidth, $newHeight, $option = "auto", $forceSize = false)
     {
-        if (!$this->image) {
-            return;
-        }
+        if (!$this->image) return;
 
         $optionArray = $this->getDimensions($newWidth, $newHeight, $option, $forceSize);
         list ($optimalWidth, $optimalHeight) = $optionArray;
-
 
         $this->initCanvas($optimalWidth, $optimalHeight);
         imagecopyresampled($this->imageResized, $this->image, 0, 0, 0, 0, $optimalWidth, $optimalHeight, $this->width, $this->height);
@@ -269,9 +267,15 @@ class ResizeImage
 
         $this->imageResized = $this->initCanvas($newWidth, $newHeight);
 
+        $startX = max(0, ($newWidth - $optimalWidth) / 2);
+        $startY = max(0, ($newHeight - $optimalHeight) / 2);
+        $newWidth = min($newWidth, $optimalWidth);
+        $newHeight = min($newHeight, $optimalHeight);
+
         imagecopyresampled(
             $this->imageResized, $old,
-            0, 0, $cropStartX, $cropStartY,
+            $startX, $startY,
+            $cropStartX, $cropStartY,
             $newWidth, $newHeight,
             $newWidth, $newHeight
         );
