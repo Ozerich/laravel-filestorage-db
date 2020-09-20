@@ -92,39 +92,6 @@ class ImageService
             if ($is_2x) {
                 $width = $width ? $width * 2 : null;
                 $height = $height ? $height * 2 : null;
-
-                if ($thumbnail->isForceSize()) {
-                    if ($width && !$height) {
-                        $width = max($width / 2, min($image->getWidth(), $width));
-                    }
-
-                    if ($height && !$height) {
-                        $height = max($height / 2, min($image->getHeight(), $height));
-                    }
-
-                    if ($width && $height) {
-                        $imageWidth = ceil(max($width / 2, $image->getWidth()));
-                        $imageHeight = ceil(max($height / 2, $image->getHeight()));
-
-                        if ($width > $imageWidth) {
-                            $k = $width / $imageWidth;
-                            $width = $imageWidth;
-                            $height = ceil($height / $k);
-                        }
-
-                        if ($height > $imageHeight) {
-                            $k = $height / $imageHeight;
-                            $height = $imageHeight;
-                            $width = ceil($width / $k);
-                        }
-
-                        if ($width > $imageWidth) {
-                            $k = $width / $imageWidth;
-                            $width = $imageWidth;
-                            $height = ceil($height / $k);
-                        }
-                    }
-                }
             }
 
             if ($thumbnail->getCrop()) {
