@@ -23,6 +23,9 @@ class Thumbnail
     private $is_force;
 
     /** @var bool */
+    private $is_force_2x;
+
+    /** @var bool */
     private $is_webp;
 
     /**
@@ -34,8 +37,9 @@ class Thumbnail
      * @param bool $is_2x
      * @param bool $is_force
      * @param bool $is_webp
+     * @param bool $is_force_2x
      */
-    public function __construct($width = 0, $height = 0, $crop = false, $exact = false, $is_2x = false, $is_force = false, $is_webp = false)
+    public function __construct($width = 0, $height = 0, $crop = false, $exact = false, $is_2x = false, $is_force = false, $is_webp = false, $is_force_2x = false)
     {
         $this->width = $width;
         $this->height = $height;
@@ -44,6 +48,7 @@ class Thumbnail
         $this->is_2x = $is_2x;
         $this->is_force = $is_force;
         $this->is_webp = $is_webp;
+        $this->is_force_2x = $is_force_2x;
     }
 
     /**
@@ -108,6 +113,14 @@ class Thumbnail
     public function isForceSize()
     {
         return $this->is_force;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isForce2xSize()
+    {
+        return $this->is_force_2x;
     }
 
     /**

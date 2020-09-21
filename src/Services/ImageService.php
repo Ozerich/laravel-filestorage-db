@@ -39,13 +39,15 @@ class ImageService
                 }
 
                 $temp_thumbnail = new TempFile();
-                self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality());
-                $scenario->getStorage()->upload($temp_thumbnail->getPath(), $image->hash, $image->ext, $thumbnail);
+                if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality())) {
+                    $scenario->getStorage()->upload($temp_thumbnail->getPath(), $image->hash, $image->ext, $thumbnail);
+                }
 
                 if ($thumbnail->is2xSupport()) {
                     $temp_thumbnail = new TempFile();
-                    self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), true);
-                    $scenario->getStorage()->upload($temp_thumbnail->getPath(), $image->hash, $image->ext, $thumbnail, true);
+                    if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), true, false)) {
+                        $scenario->getStorage()->upload($temp_thumbnail->getPath(), $image->hash, $image->ext, $thumbnail, true);
+                    }
                 }
             }
 
@@ -55,13 +57,15 @@ class ImageService
                 }
 
                 $temp_thumbnail = new TempFile();
-                self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), false, true);
-                $scenario->getStorage()->upload($temp_thumbnail->getPath(), $image->hash, 'webp', $thumbnail, false);
+                if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), false, true)) {
+                    $scenario->getStorage()->upload($temp_thumbnail->getPath(), $image->hash, 'webp', $thumbnail, false);
+                }
 
                 if ($thumbnail->is2xSupport()) {
                     $temp_thumbnail = new TempFile();
-                    self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), true, true);
-                    $scenario->getStorage()->upload($temp_thumbnail->getPath(), $image->hash, 'webp', $thumbnail, true);
+                    if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), true, true)) {
+                        $scenario->getStorage()->upload($temp_thumbnail->getPath(), $image->hash, 'webp', $thumbnail, true);
+                    }
                 }
             }
         }
@@ -76,13 +80,15 @@ class ImageService
      * @param int $quality
      * @param boolean $is_2x
      * @param boolean $is_webp
+     *
+     * @return boolean
      */
     private static function prepareThumbnailBySize($file_path, Thumbnail $thumbnail, $thumbnail_file_path, $quality = 100, $is_2x = false, $is_webp = false)
     {
         $image = new ResizeImage($file_path);
 
         if (!$image || $image->isValid() == false) {
-            return;
+            return false;
         }
 
         $width = $thumbnail->getWidth();
@@ -92,6 +98,12 @@ class ImageService
             if ($is_2x) {
                 $width = $width ? $width * 2 : null;
                 $height = $height ? $height * 2 : null;
+
+                if ($thumbnail->isForce2xSize() == false) {
+                    if ($image->getWidth() < $width || $image->getHeight() < $height) {
+                        return false;
+                    }
+                }
             }
 
             if ($thumbnail->getCrop()) {
@@ -111,6 +123,7 @@ class ImageService
             $image->saveImage($thumbnail_file_path, $quality);
         }
 
+        return true;
     }
 
     /**

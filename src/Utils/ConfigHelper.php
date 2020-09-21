@@ -80,6 +80,7 @@ class ConfigHelper
             'crop' => $mode == self::MODE_CROP,
             'exact' => $mode == self::MODE_EXACT,
             'force' => $forceResize,
+            'force2x' => false,
             'quality' => $quality
         ];
     }
@@ -96,11 +97,12 @@ class ConfigHelper
             'crop' => $mode == self::MODE_CROP,
             'exact' => $mode == self::MODE_EXACT,
             'force' => $forceResize,
+            'force2x' => false,
             'quality' => $quality
         ];
     }
 
-    public static function thumbWith2x($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = true, $quality = null)
+    public static function thumbWith2x($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = true, $force2xResize = false, $quality = null)
     {
         self::validateThumb($width, $height, $mode);
 
@@ -112,11 +114,12 @@ class ConfigHelper
             'crop' => $mode == self::MODE_CROP,
             'exact' => $mode == self::MODE_EXACT,
             'force' => $forceResize,
+            'force2x' => $force2xResize,
             'quality' => $quality
         ];
     }
 
-    public static function thumbWithWebpAnd2x($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = true, $quality = null)
+    public static function thumbWithWebpAnd2x($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = true, $force2xResize = false, $quality = null)
     {
         self::validateThumb($width, $height, $mode);
 
@@ -128,6 +131,7 @@ class ConfigHelper
             '2x' => true,
             'webp' => true,
             'force' => $forceResize,
+            'force2x' => $force2xResize,
             'quality' => $quality
         ];
     }

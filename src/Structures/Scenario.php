@@ -98,7 +98,8 @@ class Scenario
                 isset($thumbnail['exact']) ? $thumbnail['exact'] : false,
                 isset($thumbnail['2x']) ? $thumbnail['2x'] : false,
                 isset($thumbnail['force']) ? $thumbnail['force'] : false,
-                isset($thumbnail['webp']) ? $thumbnail['webp'] : false
+                isset($thumbnail['webp']) ? $thumbnail['webp'] : false,
+                isset($thumbnail['force2x']) ? $thumbnail['force2x'] : false,
             );
 
             $this->thumbnails[] = $thumbnail_model;

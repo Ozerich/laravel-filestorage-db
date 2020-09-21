@@ -15,7 +15,7 @@ abstract class BaseStorage
         }
     }
 
-    abstract function isFileExists($file_hash, $file_ext, Thumbnail $thumbnail = null);
+    abstract function isFileExists($file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false);
 
     abstract function upload($src, $file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false);
 

@@ -79,7 +79,7 @@ class File extends Model
         }
 
         $oldFilePath = $this->getPath();
-        
+
         $scenarioInstance = Storage::getScenario($scenario, true);
 
         $this->scenario = $scenarioInstance->getId();
@@ -162,9 +162,9 @@ class File extends Model
         $thumbnail = $scenario->getThumbnailByAlias($thumbnail);
 
         $url = $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail);
-        $url2x = $thumbnail->is2xSupport() ? $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail, true) : null;
+        $url2x = $thumbnail->is2xSupport() && $scenario->getStorage()->isFileExists($this->hash, $this->ext, $thumbnail, true) ? $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail, true) : null;
         $url_webp = $thumbnail->isWebpSupport() ? $scenario->getStorage()->getFileUrl($this->hash, 'webp', $thumbnail, false) : null;
-        $url_webp2x = $thumbnail->isWebpSupport() && $thumbnail->is2xSupport() ? $scenario->getStorage()->getFileUrl($this->hash, 'webp', $thumbnail, true) : null;
+        $url_webp2x = $thumbnail->isWebpSupport() && $thumbnail->is2xSupport() && $scenario->getStorage()->isFileExists($this->hash, 'webp', $thumbnail, true) ? $scenario->getStorage()->getFileUrl($this->hash, 'webp', $thumbnail, true) : null;
 
         $item = [
             'url' => $url,

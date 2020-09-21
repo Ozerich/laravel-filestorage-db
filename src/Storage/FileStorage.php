@@ -75,11 +75,12 @@ class FileStorage extends BaseStorage
      * @param $file_hash
      * @param $file_ext
      * @param Thumbnail|null $thumbnail
+     * @param boolean $is_2x
      * @return bool
      */
-    public function isFileExists($file_hash, $file_ext, Thumbnail $thumbnail = null)
+    public function isFileExists($file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false)
     {
-        return is_file($this->getAbsoluteFilePath($file_hash, $file_ext, $thumbnail));
+        return is_file($this->getAbsoluteFilePath($file_hash, $file_ext, $thumbnail, $is_2x));
     }
 
     /**
