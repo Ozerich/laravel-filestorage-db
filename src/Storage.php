@@ -232,6 +232,11 @@ class Storage
         }
 
         $file_ext = strtolower($file_ext);
+        if ($file_ext == 'svg') {
+            $processImage = new ProcessImage($file_path);
+            $processImage->fixSvg();
+        }
+
         $file_hash = Random::GetString();
 
         $scenario->getStorage()->upload($file_path, $file_hash, $file_ext);

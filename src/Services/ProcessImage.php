@@ -12,7 +12,7 @@ class ProcessImage
     {
         $this->file_name = $fileName;
         $image_info = getimagesize($fileName);
-        $this->image_type = $image_info[2];
+        $this->image_type = $image_info && isset($image_info[2]) ? $image_info[2] : null;
     }
 
     private function openImage($file)
@@ -73,6 +73,31 @@ class ProcessImage
         } catch (\Exception $exception) {
 
         }
+    }
+
+    public function fixSvg()
+    {
+        $f = fopen($this->file_name, 'r+');
+        $data = fread($f, filesize($this->file_name));
+        fclose($f);
+
+        if (!preg_match('#<svg (.+?)>#si', $data, $svgPreg)) {
+            return;
+        }
+
+        if (!preg_match('#xmlns:xlink="(.+?)"#si', $svgPreg[1])) {
+            $data = str_replace($svgPreg[0], '<svg xmlns:xlink="http://www.w3.org/1999/xlink" ' . $svgPreg[1] . '>', $data);
+        }
+
+        preg_match('#<svg (.+?)>#si', $data, $svgPreg);
+
+        if (!preg_match('#xmlns="(.+?)"#si', $svgPreg[1])) {
+            $data = str_replace($svgPreg[0], '<svg xmlns="http://www.w3.org/2000/svg" ' . $svgPreg[1] . '>', $data);
+        }
+
+        $f = fopen($this->file_name, 'w+');
+        $data = fwrite($f, $data);
+        fclose($f);
     }
 }
 
