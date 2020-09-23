@@ -229,17 +229,18 @@ class ResizeImage
     private function crop($optimalWidth, $optimalHeight, $newWidth, $newHeight, $forceSize = false, $startFromZero = false)
     {
         if ($forceSize == false) {
-
             if ($optimalWidth < $newWidth && $optimalHeight < $newHeight) {
                 return;
             }
 
-            if (!$newWidth || $newHeight > $this->height) {
+            if (!$newWidth) {
+                $newWidth = $this->getWidth() * ($newHeight / $this->height);
+            } else if (!$newHeight) {
+                $newHeight = $this->getHeight() * ($newWidth / $this->width);
+            } else if ($newHeight > $this->height) {
                 $newWidth /= ($newHeight / $this->height);
                 $newHeight = $this->height;
-            }
-
-            if (!$newHeight || $newWidth > $this->width) {
+            } else if ($newWidth > $this->width) {
                 $newHeight /= ($newWidth / $this->width);
                 $newWidth = $this->width;
             }
