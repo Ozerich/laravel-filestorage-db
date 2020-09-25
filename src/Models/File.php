@@ -96,10 +96,6 @@ class File extends Model
 
     public function getUrl($thumbnail_alias = null)
     {
-        if ($this->mime == 'image/svg' || $this->mime == 'image/svg+xml') {
-            return $this->getUrl();
-        }
-
         try {
             return $this->getAbsolutePath($thumbnail_alias);
         } catch (InvalidThumbnailException $exception) {
