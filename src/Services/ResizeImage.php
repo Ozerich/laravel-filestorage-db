@@ -16,7 +16,7 @@ class ResizeImage
     function __construct($fileName)
     {
         $image_info = getimagesize($fileName);
-        $this->image_type = $image_info[2];
+        $this->image_type = isset($image_info[2]) ? $image_info[2] : null;
 
         $imageType = exif_imagetype($fileName);
         if (in_array($imageType, array(IMAGETYPE_JPEG, IMAGETYPE_TIFF_II, IMAGETYPE_TIFF_MM))) {
