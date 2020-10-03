@@ -144,7 +144,7 @@ class ResizeImage
                 $optimalHeight = $this->getSizeByFixedWidth($newWidth);
                 break;
             case 'auto':
-                $optionArray = $this->getSizeByAuto($newWidth, $newHeight);
+                $optionArray = $this->getSizeByAuto($newWidth, $newHeight, $forceSize);
                 $optimalWidth = $optionArray['optimalWidth'];
                 $optimalHeight = $optionArray['optimalHeight'];
                 break;
@@ -167,7 +167,6 @@ class ResizeImage
             }
         }
 
-
         return [ceil($optimalWidth), ceil($optimalHeight)];
     }
 
@@ -187,20 +186,34 @@ class ResizeImage
         return $newHeight;
     }
 
-    private function getSizeByAuto($newWidth, $newHeight)
+    private function getSizeByAuto($newWidth, $newHeight, $forceSize = true)
     {
         $widthK = $newWidth / $this->width;
         $heightK = $newHeight / $this->height;
 
-        if ($widthK > $heightK) {
-            $optimalWidth = $newWidth;
-            $optimalHeight = $this->getSizeByFixedWidth($newWidth);
-        } elseif ($widthK < $heightK) {
-            $optimalWidth = $this->getSizeByFixedHeight($newHeight);
-            $optimalHeight = $newHeight;
+        if ($forceSize) {
+            if ($widthK > $heightK) {
+                $optimalWidth = $newWidth;
+                $optimalHeight = $this->getSizeByFixedWidth($newWidth);
+            } elseif ($widthK < $heightK) {
+                $optimalWidth = $this->getSizeByFixedHeight($newHeight);
+                $optimalHeight = $newHeight;
+            } else {
+                $optimalWidth = $newWidth;
+                $optimalHeight = $newHeight;
+            }
         } else {
-            $optimalWidth = $newWidth;
-            $optimalHeight = $newHeight;
+            if ($newWidth < $this->width && $newHeight < $this->height) {
+                return $this->getSizeByAuto($newWidth, $newHeight, true);
+            }
+
+            if ($heightK < 1) {
+                $optimalHeight = $newHeight;
+                $optimalWidth = $this->width * $heightK;
+            } else if ($widthK < 1) {
+                $optimalWidth = $newWidth;
+                $optimalHeight = $this->height * $widthK;
+            }
         }
 
         return array('optimalWidth' => $optimalWidth, 'optimalHeight' => $optimalHeight);
