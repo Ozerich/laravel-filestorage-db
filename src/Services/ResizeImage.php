@@ -114,7 +114,7 @@ class ResizeImage
         $this->initCanvas($optimalWidth, $optimalHeight);
         imagecopyresampled($this->imageResized, $this->image, 0, 0, 0, 0, $optimalWidth, $optimalHeight, $this->width, $this->height);
 
-        if (($option == 'auto' && (!$newWidth || !$newHeight)) || ($newWidth || $newHeight)) {
+        if (($option == 'auto' && (!$newWidth || !$newHeight)) || ($option != 'auto' && ($newWidth || $newHeight))) {
             $this->crop($optimalWidth, $optimalHeight, $newWidth, $newHeight, $forceSize, $option == 'auto');
         }
     }
