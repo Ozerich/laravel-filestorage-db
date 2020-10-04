@@ -114,7 +114,7 @@ class ResizeImage
         $this->initCanvas($optimalWidth, $optimalHeight);
         imagecopyresampled($this->imageResized, $this->image, 0, 0, 0, 0, $optimalWidth, $optimalHeight, $this->width, $this->height);
 
-        if ($newWidth || $newHeight) {
+        if (($option == 'auto' && (!$newWidth || !$newHeight)) || ($newWidth || $newHeight)) {
             $this->crop($optimalWidth, $optimalHeight, $newWidth, $newHeight, $forceSize, $option == 'auto');
         }
     }
@@ -154,6 +154,7 @@ class ResizeImage
                 $optimalHeight = $optionArray['optimalHeight'];
                 break;
         }
+
 
         if ($forceSize == false) {
             if ($optimalHeight > $this->height) {
@@ -250,12 +251,14 @@ class ResizeImage
                 $newWidth = $this->getWidth() * ($newHeight / $this->height);
             } else if (!$newHeight) {
                 $newHeight = $this->getHeight() * ($newWidth / $this->width);
-            } else if ($newHeight > $this->height) {
-                $newWidth /= ($newHeight / $this->height);
-                $newHeight = $this->height;
-            } else if ($newWidth > $this->width) {
-                $newHeight /= ($newWidth / $this->width);
-                $newWidth = $this->width;
+            } else {
+                if ($newHeight > $this->height) {
+                    $newWidth /= ($newHeight / $this->height);
+                    $newHeight = $this->height;
+                } else if ($newWidth > $this->width) {
+                    $newHeight /= ($newWidth / $this->width);
+                    $newWidth = $this->width;
+                }
             }
         }
 
