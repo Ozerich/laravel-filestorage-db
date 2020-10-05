@@ -207,11 +207,12 @@ class ResizeImage
                 $optimalHeight = $newHeight;
             }
         } else {
-            if ($newWidth < $this->width && $newHeight < $this->height) {
+            if ($newWidth > $this->width && $newHeight > $this->height) {
+                $optimalWidth = $this->width;
+                $optimalHeight = $this->height;
+            } else if ($newWidth < $this->width && $newHeight < $this->height) {
                 return $this->getSizeByAuto($newWidth, $newHeight, true);
-            }
-
-            if ($heightK < 1) {
+            } else if ($heightK < 1) {
                 $optimalHeight = $newHeight;
                 $optimalWidth = $this->width * $heightK;
             } else if ($widthK < 1) {
