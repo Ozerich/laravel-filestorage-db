@@ -189,6 +189,9 @@ class ResizeImage
 
     private function getSizeByAuto($newWidth, $newHeight, $forceSize = true)
     {
+        $optimalWidth = $newWidth;
+        $optimalHeight = $newHeight;
+
         $widthK = $newWidth / $this->width;
         $heightK = $newHeight / $this->height;
 
