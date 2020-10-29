@@ -38,6 +38,15 @@ class ConfigHelper
         ];
     }
 
+    public static function videoValidator()
+    {
+        return [
+            'maxSize' => 1000 * 1024 * 1024,
+            'checkExtensionByMimeType' => true,
+            'extensions' => ['mp4']
+        ];
+    }
+
     public static function fileStorage($folderName)
     {
         return [
