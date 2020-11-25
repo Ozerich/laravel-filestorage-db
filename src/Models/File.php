@@ -211,7 +211,12 @@ class File extends Model
             $this->setScenario($scenario);
         }
 
-        $scenarioInstance = $this->scenarioInstance();
+        try {
+            $scenarioInstance = $this->scenarioInstance();
+        } catch (InvalidScenarioException $exception) {
+            return null;
+        }
+
         if ($scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext) == false) {
             return null;
         }
