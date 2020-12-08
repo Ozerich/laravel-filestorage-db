@@ -115,7 +115,9 @@ class ResizeImage
         imagecopyresampled($this->imageResized, $this->image, 0, 0, 0, 0, $optimalWidth, $optimalHeight, $this->width, $this->height);
 
         if (($option == 'auto' && (!$newWidth || !$newHeight)) || ($option != 'auto' && ($newWidth || $newHeight))) {
-            $this->crop($optimalWidth, $optimalHeight, $newWidth, $newHeight, $forceSize, $option == 'auto');
+            if (($newWidth && ($newWidth < $optimalWidth)) || ($newHeight && ($newHeight < $optimalHeight))) {
+                $this->crop($optimalWidth, $optimalHeight, $newWidth, $newHeight, $forceSize, $option == 'auto');
+            }
         }
     }
 
