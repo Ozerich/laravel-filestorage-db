@@ -204,6 +204,7 @@ class Validator
             'application/x-stuffit' => 'sit',
             'application/smil' => 'smil',
             'text/srt' => 'srt',
+            'image/svg' => 'svg',
             'image/svg+xml' => 'svg',
             'application/x-shockwave-flash' => 'swf',
             'application/x-tar' => 'tar',
