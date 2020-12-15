@@ -16,23 +16,6 @@ class File extends Model
     protected $table = 'files';
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
-    protected $fillable = [
-        'name',
-        'price',
-        'price_old',
-        'is_new',
-        'is_popular',
-        'count',
-        'count_text',
-        'description',
-        'url_alias',
-    ];
-
-    /**
      * @return \Ozerich\FileStorage\Structures\Scenario
      * @throws InvalidScenarioException
      */
@@ -138,7 +121,7 @@ class File extends Model
         return $result;
     }
 
-    public function getDefaultThumbnailUrl($scenario)
+    public function getDefaultThumbnailUrl($scenario = null)
     {
         if ($this->mime == 'image/svg' || $this->mime == 'image/svg+xml') {
             return $this->getUrl();
