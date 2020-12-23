@@ -88,6 +88,10 @@ class Storage
             }
         }
 
+        if (preg_match('#https://drive.google.com/file/d/(.+?)/view#si', $url, $urlPreg)) {
+            $url = 'https://drive.google.com/u/0/uc?id=' . $urlPreg[1] . '&export=download';
+        }
+
         $p = strrpos($url, '?');
         if ($p !== false) {
             $url_without_params = substr($url, 0, $p);
