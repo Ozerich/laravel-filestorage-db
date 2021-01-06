@@ -177,14 +177,14 @@ class File extends Model
         return $item;
     }
 
-    public function getShortJson()
+    public function getShortJson($thumbnailAlias = null)
     {
         return [
             'id' => $this->id,
             'mime' => $this->mime,
             'name' => $this->name,
             'size' => $this->size,
-            'url' => $this->getUrl()
+            'url' => $this->getUrl($thumbnailAlias)
         ];
     }
 
