@@ -77,13 +77,21 @@ class File extends Model
         return $this;
     }
 
-    public function getUrl($thumbnail_alias = null)
+    public function getUrl($thumbnail_alias = null, $returnOriginalByDefault = true)
     {
-        try {
-            return $this->getAbsolutePath($thumbnail_alias);
-        } catch (InvalidThumbnailException $exception) {
+        if (empty($thumbnail_alias)) {
             return $this->getAbsolutePath();
         }
+
+        if (!$this->isThumbnailExists($thumbnail_alias)) {
+            return $this->getAbsolutePath();
+        }
+
+        if ($returnOriginalByDefault && !$this->isFileExists($thumbnail_alias)) {
+            return $this->getAbsolutePath();
+        }
+
+        return $this->getAbsolutePath($thumbnail_alias);
     }
 
     private function dashesToCamelCase($string, $capitalizeFirstCharacter = false)
@@ -238,7 +246,7 @@ class File extends Model
     /**
      * @return bool
      */
-    public function isFileExists()
+    public function isFileExists($thumbnailAlias = null)
     {
         try {
             $scenarioInstance = $this->scenarioInstance();
@@ -246,7 +254,7 @@ class File extends Model
             return false;
         }
 
-        return $scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext);
+        return $scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext, $thumbnailAlias);
     }
 
     /**
