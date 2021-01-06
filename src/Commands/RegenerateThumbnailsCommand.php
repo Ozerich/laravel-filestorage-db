@@ -24,7 +24,8 @@ class RegenerateThumbnailsCommand extends Command
 
     public function handle(FileRepository $fileRepository)
     {
-        $files = $fileRepository->all();
+        $files = $fileRepository->all()->reverse();
+
         foreach ($files as $ind => $file) {
             echo 'File ' . ($ind + 1) . ' / ' . count($files) . ': ID ' . $file->id . ' ---- ';
             Storage::staticPrepareThumbnails($file, null, true);
