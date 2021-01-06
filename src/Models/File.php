@@ -258,7 +258,7 @@ class File extends Model
 
         if ($thumbnailAlias) {
             try {
-                $thumbnail = $scenarioInstance->getThumbnailByAlias($thumbnail);
+                $thumbnail = $scenarioInstance->getThumbnailByAlias($thumbnailAlias);
             } catch (InvalidThumbnailException $exception) {
                 return false;
             }
