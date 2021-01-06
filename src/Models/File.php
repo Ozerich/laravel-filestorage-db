@@ -248,4 +248,24 @@ class File extends Model
 
         return $scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext);
     }
+
+    /**
+     * @param string $thumbnail
+     * @return bool
+     */
+    public function isThumbnailExists($thumbnail)
+    {
+        try {
+            $scenarioInstance = $this->scenarioInstance();
+        } catch (InvalidScenarioException $exception) {
+            return false;
+        }
+
+        try {
+            $scenarioInstance->getThumbnailByAlias($thumbnail);
+            return true;
+        } catch (InvalidThumbnailException $exception) {
+            return false;
+        }
+    }
 }
