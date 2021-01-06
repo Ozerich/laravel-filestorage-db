@@ -254,7 +254,17 @@ class File extends Model
             return false;
         }
 
-        return $scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext, $thumbnailAlias);
+        $thumbnail = null;
+
+        if ($thumbnailAlias) {
+            try {
+                $thumbnail = $scenarioInstance->getThumbnailByAlias($thumbnail);
+            } catch (InvalidThumbnailException $exception) {
+                return false;
+            }
+        }
+
+        return $scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext, $thumbnail);
     }
 
     /**
