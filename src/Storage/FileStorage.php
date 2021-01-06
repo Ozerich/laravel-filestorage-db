@@ -172,6 +172,10 @@ class FileStorage extends BaseStorage
      */
     public function getFileUrl($file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false)
     {
+        if ($this->isFileExists($file_hash, $file_ext, $thumbnail, $is_2x) == false) {
+            return null;
+        }
+
         return config('app.url') . $this->uploadDirUrl . $this->getFilePath($file_hash, $file_ext, $thumbnail, '/', $is_2x);
     }
 
