@@ -160,7 +160,12 @@ class File extends Model
         }
 
         $scenario = $this->scenarioInstance();
-        $thumbnail = $scenario->getThumbnailByAlias($thumbnail);
+
+        try {
+            $thumbnail = $scenario->getThumbnailByAlias($thumbnail);
+        } catch (InvalidThumbnailException $invalidThumbnailException) {
+            return null;
+        }
 
         $url = $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail);
         $url2x = $thumbnail->is2xSupport() && $scenario->getStorage()->isFileExists($this->hash, $this->ext, $thumbnail, true) ? $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail, true) : null;
