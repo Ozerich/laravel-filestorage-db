@@ -149,7 +149,7 @@ class File extends Model
 
     public function getDefaultThumbnailJson($scenario = null)
     {
-        return $this->getThumbnailJson('default', $scenario)
+        return $this->getThumbnailJson('default', $scenario);
     }
 
     public function getThumbnailJson($thumbnailName, $scenario = null)
