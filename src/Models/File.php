@@ -147,7 +147,12 @@ class File extends Model
         }
     }
 
-    public function getThumbnailJson($thumbnail, $scenario = null)
+    public function getDefaultThumbnailJson($scenario = null)
+    {
+        return $this->getThumbnailJson('default', $scenario)
+    }
+
+    public function getThumbnailJson($thumbnailName, $scenario = null)
     {
         if ($this->mime == 'image/svg' || $this->mime == 'image/svg+xml') {
             return [
@@ -161,8 +166,12 @@ class File extends Model
 
         $scenario = $this->scenarioInstance();
 
+        if ($this->isFileExists($thumbnailName) == false) {
+            return null;
+        }
+
         try {
-            $thumbnail = $scenario->getThumbnailByAlias($thumbnail);
+            $thumbnail = $scenario->getThumbnailByAlias($thumbnailName);
         } catch (InvalidThumbnailException $invalidThumbnailException) {
             return null;
         }
