@@ -30,11 +30,15 @@ class File extends Model
 
     /**
      * @param string|null $thumbnail_alias
-     * @return string
+     * @return string|null
      */
     public function getAbsolutePath($thumbnail_alias = null)
     {
-        $scenario = $this->scenarioInstance();
+        try {
+            $scenario = $this->scenarioInstance();
+        } catch(InvalidScenarioException $exception){
+            return null;
+        }
 
         $thumbnail = null;
         if (!empty($thumbnail_alias)) {
