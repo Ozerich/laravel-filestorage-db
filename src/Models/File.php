@@ -36,7 +36,7 @@ class File extends Model
     {
         try {
             $scenario = $this->scenarioInstance();
-        } catch(InvalidScenarioException $exception){
+        } catch (InvalidScenarioException $exception) {
             return null;
         }
 
@@ -214,7 +214,7 @@ class File extends Model
         ];
     }
 
-    public function getFullJson($scenario = null, $withOriginalUrl = false, $regenerateThumbnailsIfNeeded = true)
+    public function getFullJson($scenario = null, $withOriginalUrl = false, $regenerateThumbnailsIfNeeded = true, $exceptThumbnails = [])
     {
         if ($scenario && $this->scenario != $scenario) {
             $this->setScenario($scenario);
@@ -236,10 +236,23 @@ class File extends Model
                 Storage::staticPrepareThumbnails($this);
             }
 
-            foreach ($scenarioInstance->getThumbnails() as $alias => $thumbnail) {
-                if ($scenarioInstance->isSingleThumbnail() && $alias == 'default') {
-                    $thumbs = $this->getThumbnailJson($alias);
-                } else {
+            $thumbnails = $scenarioInstance->getThumbnails();
+            $thumbnailsFiltered = [];
+            if (!empty($exceptThumbnails)) {
+                foreach ($thumbnails as $thumbnailAlias => $thumbnailInstance) {
+                    if (in_array($thumbnailAlias, $exceptThumbnails) == false) {
+                        $thumbnailsFiltered[$thumbnailAlias] = $thumbnailInstance;
+                    }
+                }
+            } else {
+                $thumbnailsFiltered = $thumbnails;
+            }
+
+            $isSingleThumbnail = count($thumbnailsFiltered) === 1 && isset($thumbnailsFiltered['default']);
+            if ($isSingleThumbnail) {
+                $thumbs = $this->getThumbnailJson('default');
+            } else {
+                foreach ($thumbnailsFiltered as $alias => $thumbnail) {
                     $thumbs[$this->dashesToCamelCase($alias)] = $this->getThumbnailJson($alias);
                 }
             }
