@@ -111,6 +111,7 @@ class Validator
             'text/x-comma-separated-values' => 'csv',
             'text/comma-separated-values' => 'csv',
             'application/vnd.msexcel' => 'csv',
+            'application/csv' => 'csv',
             'application/x-director' => 'dcr',
             'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
             'application/x-dvi' => 'dvi',
