@@ -5,7 +5,7 @@ namespace Ozerich\FileStorage\Repositories;
 use Illuminate\Database\Eloquent\Model;
 use Ozerich\FileStorage\Models\File;
 
-class FileRepository implements IFileRepository
+class FileRepository
 {
     /**
      * @var Model
@@ -23,7 +23,16 @@ class FileRepository implements IFileRepository
      */
     public function find($id): ?File
     {
-        return $this->model->find($id);
+        return $this->model::query()->where('uuid', '=', $id)->first();
+    }
+
+    /**
+     * @param $id
+     * @return File
+     */
+    public function findById($id): ?File
+    {
+        return $this->model::query()->where('id', '=', $id)->first();
     }
 
     /**

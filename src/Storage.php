@@ -3,6 +3,8 @@
 namespace Ozerich\FileStorage;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+use Ramsey\Uuid\Uuid;
 use Ozerich\FileStorage\Jobs\PrepareThumbnailsJob;
 use Ozerich\FileStorage\Models\File;
 use Ozerich\FileStorage\Repositories\FileRepository;
@@ -274,6 +276,7 @@ class Storage
 
         $model = new File();
 
+        $model->uuid = Uuid::uuid4();
         $model->hash = $file_hash;
         $model->name = $file_name;
         $model->scenario = $scenario->getId();
@@ -306,7 +309,7 @@ class Storage
 
         $scenario = (new StorageConfig())->getScenarioByName($file->scenario);
         if (!$scenario) {
-            return;
+            return false;
         }
 
         return ImageService::prepareThumbnails($file, $scenario, $thumbnail);
@@ -314,10 +317,11 @@ class Storage
 
     public function setFileScenario($fileId, $scenario)
     {
-        $repository = new FileRepository(new File());
+        /** @var FileRepository $repository */
+        $repository = App::make(FileRepository::class);
 
         /** @var File $model */
-        $model = $repository->find($fileId);
+        $model = $repository->findById($fileId);
         if (!$model) {
             return null;
         }

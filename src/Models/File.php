@@ -9,6 +9,21 @@ use Ozerich\FileStorage\Exceptions\InvalidThumbnailException;
 use Ozerich\FileStorage\Jobs\PrepareThumbnailsJob;
 use Ozerich\FileStorage\Storage;
 
+/**
+ * Class File
+ * @package Ozerich\FileStorage\Models
+ *
+ * @property int $id
+ * @property string $uuid
+ * @property string $scenario
+ * @property string $hash
+ * @property string $name
+ * @property string $ext
+ * @property string $mime
+ * @property int $size
+ * @property int $width
+ * @property int $height
+ */
 class File extends Model
 {
     use SoftDeletes;
@@ -206,7 +221,7 @@ class File extends Model
     public function getShortJson($thumbnailAlias = null)
     {
         return [
-            'id' => $this->id,
+            'id' => $this->uuid,
             'mime' => $this->mime,
             'name' => $this->name,
             'size' => $this->size,

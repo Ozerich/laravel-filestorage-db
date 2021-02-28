@@ -11,19 +11,6 @@ use Ozerich\FileStorage\Services\TempFile;
 class StorageServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        $this->app->bind(
-            IFileRepository::class,
-            FileRepository::class
-        );
-    }
-
-    /**
      * Bootstrap any application services.
      *
      * @return void
