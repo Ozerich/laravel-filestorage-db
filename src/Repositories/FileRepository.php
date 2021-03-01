@@ -23,6 +23,10 @@ class FileRepository
      */
     public function find($id): ?File
     {
+        if (is_numeric($id)) {
+            return $this->findById($id);
+        }
+        
         return $this->model::query()->where('uuid', '=', $id)->first();
     }
 
