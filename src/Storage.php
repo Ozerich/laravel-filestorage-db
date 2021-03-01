@@ -338,4 +338,21 @@ class Storage
         readfile($file->getPath());
         exit;
     }
+
+    public static function fromUUIDtoId(?string $uuid): ?int
+    {
+        if (!$uuid) {
+            return null;
+        }
+
+        /** @var FileRepository $repository */
+        $repository = App::make(FileRepository::class);
+
+        $model = $repository->find($uuid);
+        if (!$model) {
+            return null;
+        }
+
+        return $model->id;
+    }
 }
