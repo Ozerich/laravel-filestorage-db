@@ -321,7 +321,7 @@ class Storage
         $repository = App::make(FileRepository::class);
 
         /** @var File $model */
-        $model = $repository->findById($fileId);
+        $model = $repository->find($fileId);
         if (!$model) {
             return null;
         }
