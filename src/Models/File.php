@@ -92,7 +92,7 @@ class File extends Model
 
         $scenarioInstance->getStorage()->upload(
             $oldFilePath, $this->hash, $this->ext, null, false,
-            $scenario->shouldSaveOriginalFilename() ? $this->name : null
+            $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
         );
 
         if ($regenerateThumbnails && $scenarioInstance && $scenarioInstance->hasThumnbails()) {
