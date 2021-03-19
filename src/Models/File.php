@@ -60,7 +60,10 @@ class File extends Model
             $thumbnail = $scenario->getThumbnailByAlias($thumbnail_alias);
         }
 
-        return $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail);
+        return $scenario->getStorage()->getFileUrl(
+            $this->hash, $this->ext, $thumbnail, false,
+            $scenario->shouldSaveOriginalFilename() ? $this->name : null
+        );
     }
 
     public function getPath()
@@ -87,7 +90,10 @@ class File extends Model
         $this->scenario = $scenarioInstance->getId();
         $this->save();
 
-        $scenarioInstance->getStorage()->upload($oldFilePath, $this->hash, $this->ext);
+        $scenarioInstance->getStorage()->upload(
+            $oldFilePath, $this->hash, $this->ext, null, false,
+            $scenario->shouldSaveOriginalFilename() ? $this->name : null
+        );
 
         if ($regenerateThumbnails && $scenarioInstance && $scenarioInstance->hasThumnbails()) {
             dispatch(new PrepareThumbnailsJob($this));
@@ -127,7 +133,7 @@ class File extends Model
     public function getThumbnailsJson($thumbnails)
     {
         $scenarioInstance = $this->scenarioInstance();
-        if ($scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext) == false) {
+        if ($scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext, null, false, $scenario->shouldSaveOriginalFilename() ? $this->name : null) == false) {
             return null;
         }
 
@@ -195,10 +201,12 @@ class File extends Model
             return null;
         }
 
-        $url = $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail);
-        $url2x = $thumbnail->is2xSupport() && $scenario->getStorage()->isFileExists($this->hash, $this->ext, $thumbnail, true) ? $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail, true) : null;
-        $url_webp = $thumbnail->isWebpSupport() ? $scenario->getStorage()->getFileUrl($this->hash, 'webp', $thumbnail, false) : null;
-        $url_webp2x = $thumbnail->isWebpSupport() && $thumbnail->is2xSupport() && $scenario->getStorage()->isFileExists($this->hash, 'webp', $thumbnail, true) ? $scenario->getStorage()->getFileUrl($this->hash, 'webp', $thumbnail, true) : null;
+        $originalFilename = $scenario->shouldSaveOriginalFilename() ? $this->name : null;
+
+        $url = $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail, false, $originalFilename);
+        $url2x = $thumbnail->is2xSupport() && $scenario->getStorage()->isFileExists($this->hash, $this->ext, $thumbnail, true, $originalFilename) ? $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail, true, $originalFilename) : null;
+        $url_webp = $thumbnail->isWebpSupport() ? $scenario->getStorage()->getFileUrl($this->hash, 'webp', $thumbnail, false, $originalFilename) : null;
+        $url_webp2x = $thumbnail->isWebpSupport() && $thumbnail->is2xSupport() && $scenario->getStorage()->isFileExists($this->hash, 'webp', $thumbnail, true, $originalFilename) ? $scenario->getStorage()->getFileUrl($this->hash, 'webp', $thumbnail, true, $originalFilename) : null;
 
         $item = [
             'url' => $url,
@@ -241,10 +249,12 @@ class File extends Model
             return null;
         }
 
-        if ($scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext) == false) {
-            return null;
-        }
+        if (!$scenarioInstance->getStorage()->isFileExists(
+            $this->hash, $this->ext, null, false,
+            $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
+        )) return null;
 
+        
         $thumbs = [];
         if ($scenarioInstance->hasThumnbails()) {
             if ($regenerateThumbnailsIfNeeded) {
@@ -310,7 +320,9 @@ class File extends Model
             }
         }
 
-        return $scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext, $thumbnail);
+        return $scenarioInstance->getStorage()->isFileExists(
+            $this->hash, $this->ext, $thumbnail, false, $scenarioInstance->shouldSaveOriginalFilename()
+        );
     }
 
     /**

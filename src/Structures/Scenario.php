@@ -34,6 +34,9 @@ class Scenario
     /** @var integer */
     private $quality = 88;
 
+    /** @var boolean */
+    private $saveOriginalFilename = false;
+
     /**
      * Scenario constructor.
      * @param $id
@@ -61,6 +64,7 @@ class Scenario
             $this->setThumbnails($config['thumbnails']);
         }
 
+        $this->saveOriginalFilename = $config['saveOriginalFilename'] ?? false;
 
         if (isset($config['fixOrientation'])) {
             $this->fixOrientation = (bool)$config['fixOrientation'];
@@ -220,5 +224,13 @@ class Scenario
     public function isSingleThumbnail()
     {
         return $this->isSingleThumbnail;
+    }
+
+    /**
+     * @return bool
+     */
+    public function shouldSaveOriginalFilename()
+    {
+        return $this->saveOriginalFilename;
     }
 }

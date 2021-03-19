@@ -11,7 +11,7 @@ class ImageService
     private static function createTempFile(File $file, Scenario $scenario)
     {
         $temp_file = new TempFile();
-        $scenario->getStorage()->download($file->hash, $file->ext, $temp_file->getPath());
+        $scenario->getStorage()->download($file->hash, $file->ext, $temp_file->getPath(), null, $scenario->shouldSaveOriginalFilename() ? $file->name : null);
         return $temp_file;
     }
 
@@ -24,7 +24,7 @@ class ImageService
      */
     public static function prepareThumbnails(File $image, Scenario $scenario, ?Thumbnail $thumbnail = null)
     {
-        if ($scenario->getStorage()->isFileExists($image->hash, $image->ext) == false) {
+        if ($scenario->getStorage()->isFileExists($image->hash, $image->ext, null, false, $scenario->shouldSaveOriginalFilename() ? $image->name : null) == false) {
             return false;
         }
 
@@ -33,38 +33,39 @@ class ImageService
         $thumbnails = $thumbnail ? [$thumbnail] : $scenario->getThumbnails();
         foreach ($thumbnails as $thumbnail) {
 
-            if ($scenario->getStorage()->isFileExists($image->hash, $image->ext, $thumbnail) == false) {
+            if ($scenario->getStorage()->isFileExists($image->hash, $image->ext, $thumbnail, false, $scenario->shouldSaveOriginalFilename() ? $image->name : null) == false) {
+
                 if (!$temp_file) {
                     $temp_file = self::createTempFile($image, $scenario);
                 }
 
                 $temp_thumbnail = new TempFile();
                 if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality())) {
-                    $scenario->getStorage()->upload($temp_thumbnail->getPath(), $image->hash, $image->ext, $thumbnail);
+                    $scenario->getStorage()->upload($temp_thumbnail->getPath(), $image->hash, $image->ext, $thumbnail, false, $scenario->shouldSaveOriginalFilename() ? $image->name : null);
                 }
 
                 if ($thumbnail->is2xSupport()) {
                     $temp_thumbnail = new TempFile();
                     if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), true, false)) {
-                        $scenario->getStorage()->upload($temp_thumbnail->getPath(), $image->hash, $image->ext, $thumbnail, true);
+                        $scenario->getStorage()->upload($temp_thumbnail->getPath(), $image->hash, $image->ext, $thumbnail, true, $scenario->shouldSaveOriginalFilename() ? $image->name : null);
                     }
                 }
             }
 
-            if ($thumbnail->isWebpSupport() && $scenario->getStorage()->isFileExists($image->hash, 'webp', $thumbnail) == false) {
+            if ($thumbnail->isWebpSupport() && $scenario->getStorage()->isFileExists($image->hash, 'webp', $thumbnail, false, $scenario->shouldSaveOriginalFilename() ? $image->name : null) == false) {
                 if (!$temp_file) {
                     $temp_file = self::createTempFile($image, $scenario);
                 }
 
                 $temp_thumbnail = new TempFile();
                 if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), false, true)) {
-                    $scenario->getStorage()->upload($temp_thumbnail->getPath(), $image->hash, 'webp', $thumbnail, false);
+                    $scenario->getStorage()->upload($temp_thumbnail->getPath(), $image->hash, 'webp', $thumbnail, false, $scenario->shouldSaveOriginalFilename() ? $image->name : null);
                 }
 
                 if ($thumbnail->is2xSupport()) {
                     $temp_thumbnail = new TempFile();
                     if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), true, true)) {
-                        $scenario->getStorage()->upload($temp_thumbnail->getPath(), $image->hash, 'webp', $thumbnail, true);
+                        $scenario->getStorage()->upload($temp_thumbnail->getPath(), $image->hash, 'webp', $thumbnail, true, $scenario->shouldSaveOriginalFilename() ? $image->name : null);
                     }
                 }
             }

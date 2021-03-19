@@ -245,7 +245,26 @@ class Storage
 
         $file_hash = Random::GetString();
 
-        $scenario->getStorage()->upload($file_path, $file_hash, $file_ext);
+        if ($scenario->shouldSaveOriginalFilename()) {
+            $ind = 0;
+            $baseFilename = $file_name;
+            $baseFilenamePointPos = strrpos($baseFilename, '.');
+            $baseFilenameWithoutExt = $baseFilenamePointPos !== null ? substr($baseFilename, 0, $baseFilenamePointPos) : $baseFilename;
+
+            while (true) {
+                if ($scenario->getStorage()->isFileExists($file_hash, $file_ext, null, false, $file_name) == false) {
+                    break;
+                }
+                $ind = $ind + 1;
+                $file_name = $baseFilenameWithoutExt . '(' . $ind . ').' . $file_ext;
+            }
+        }
+
+        $scenario->getStorage()->upload(
+            $file_path, $file_hash, $file_ext, null, false,
+            $scenario->shouldSaveOriginalFilename() ? $file_name : null
+        );
+
         $model = $this->createModel($temp->getPath(), $file_hash, $file_name, $file_ext, $scenario);
 
         if (!$model) {
