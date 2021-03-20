@@ -182,7 +182,7 @@ class FileStorage extends BaseStorage
             return null;
         }
 
-        return config('app.url') . $this->uploadDirUrl . $this->getFilePath($file_hash, $file_ext, $thumbnail, '/', $is_2x, $originalFileName);
+        return $this->uploadDirUrl . $this->getFilePath($file_hash, $file_ext, $thumbnail, '/', $is_2x, $originalFileName);
     }
 
     /**
@@ -203,7 +203,7 @@ class FileStorage extends BaseStorage
             $p = strrpos($originalFileName, '.');
             if ($p !== false) {
                 $filename = substr($originalFileName, 0, $p);
-            } else{
+            } else {
                 $filename = $originalFileName;
             }
         } else {
