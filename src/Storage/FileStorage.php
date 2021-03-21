@@ -2,6 +2,7 @@
 
 namespace Ozerich\FileStorage\Storage;
 
+use Illuminate\Support\Facades\Request;
 use Ozerich\FileStorage\Structures\Thumbnail;
 
 class FileStorage extends BaseStorage
@@ -182,7 +183,14 @@ class FileStorage extends BaseStorage
             return null;
         }
 
-        return $this->uploadDirUrl . $this->getFilePath($file_hash, $file_ext, $thumbnail, '/', $is_2x, $originalFileName);
+        $referer = Request::header('referer');
+        if (empty($referer) || parse_url($referer, PHP_URL_HOST) !== Request::getHost()) {
+            $baseUri = Request::root();
+        } else {
+            $baseUri = '';
+        }
+
+        return $baseUri . $this->uploadDirUrl . $this->getFilePath($file_hash, $file_ext, $thumbnail, '/', $is_2x, $originalFileName);
     }
 
     /**
