@@ -183,14 +183,7 @@ class FileStorage extends BaseStorage
             return null;
         }
 
-        $referer = Request::header('referer');
-        if (empty($referer) || parse_url($referer, PHP_URL_HOST) !== Request::getHost()) {
-            $baseUri = Request::root();
-        } else {
-            $baseUri = '';
-        }
-
-        return $baseUri . $this->uploadDirUrl . $this->getFilePath($file_hash, $file_ext, $thumbnail, '/', $is_2x, $originalFileName);
+        return config('app.url') . $this->uploadDirUrl . $this->getFilePath($file_hash, $file_ext, $thumbnail, '/', $is_2x, $originalFileName);
     }
 
     /**
