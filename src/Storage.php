@@ -349,11 +349,13 @@ class Storage
         return $model;
     }
 
-    public function sendDownloadFileResponse(File $file)
+    public function sendDownloadFileResponse(File $file, ?string $filename = null)
     {
+        $filename = $filename ?? basename($file->name);
+
         header('Content-Type: ' . $file->mime);
         header("Content-Transfer-Encoding: Binary");
-        header("Content-disposition: attachment; filename=\"" . basename($file->name) . "\"");
+        header("Content-disposition: attachment; filename=\"" . $filename . "\"");
         readfile($file->getPath());
         exit;
     }
