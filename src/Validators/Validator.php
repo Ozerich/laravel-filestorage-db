@@ -278,7 +278,9 @@ class Validator
             return false;
         }
         if ($this->maxSize && filesize($file_path) > $this->maxSize) {
-            $this->addError('The file is too big, max file size is ' . round($this->maxSize / 1024 / 1024, 2) . ' MB');
+            $this->addError(__('filestorage::messages.file_too_big', [
+                'size' => round($this->maxSize / 1024 / 1024, 2) . ' MB'
+            ]));
         }
 
         if ($this->checkExtensionByMimeType) {
@@ -293,7 +295,9 @@ class Validator
         }
 
         if (in_array(strtolower($extension), $this->extensions) == false) {
-            $this->addError('Only files with these extensions are allowed: "' . implode(', ', $this->extensions) . '".');
+            $this->addError(__('filestorage::messages.file_invalid_extension', [
+                'ext_list' => implode(', ', $this->extensions)
+            ]));
         }
 
         return empty($this->errors);

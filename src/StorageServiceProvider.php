@@ -30,5 +30,7 @@ class StorageServiceProvider extends ServiceProvider
                 RegenerateThumbnailsCommand::class,
             ]);
         }
+
+        $this->loadTranslationsFrom(__DIR__ . '/../resources/lang', 'filestorage');
     }
 }
