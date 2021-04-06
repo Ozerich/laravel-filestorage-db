@@ -50,12 +50,14 @@ class Validator
         }
     }
 
-    /**
-     * @return array
-     */
-    public function getErrors()
+    public function getErrors(): array
     {
         return $this->errors;
+    }
+
+    public function getLastError(): ?string
+    {
+        return $this->errors[0] ?? null;
     }
 
     /**

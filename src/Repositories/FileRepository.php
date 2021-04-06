@@ -17,16 +17,12 @@ class FileRepository
         $this->model = $model;
     }
 
-    /**
-     * @param $id
-     * @return File
-     */
-    public function find($id): ?File
+    public function find(int|string $id): ?File
     {
         if (is_numeric($id)) {
             return $this->findById($id);
         }
-        
+
         return $this->model::query()->where('uuid', '=', $id)->first();
     }
 

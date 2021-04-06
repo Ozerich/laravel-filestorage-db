@@ -4,6 +4,7 @@ namespace Ozerich\FileStorage\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Ozerich\FileStorage\Exceptions\InvalidFileForScenarioException;
 use Ozerich\FileStorage\Exceptions\InvalidScenarioException;
 use Ozerich\FileStorage\Exceptions\InvalidThumbnailException;
 use Ozerich\FileStorage\Jobs\PrepareThumbnailsJob;
@@ -77,7 +78,7 @@ class File extends Model
         return $scenario->getStorage()->getAbsoluteFilePath($this->hash, $this->ext);
     }
 
-    public function setScenario($scenario, $regenerateThumbnails = false)
+    public function setScenario($scenario, $regenerateThumbnails = false, $throwExceptionIfInvalid = false)
     {
         if ($this->scenario == $scenario) {
             return $this;
@@ -86,6 +87,18 @@ class File extends Model
         $oldFilePath = $this->getPath();
 
         $scenarioInstance = Storage::getScenario($scenario, true);
+
+        $validator = $scenarioInstance->getValidator();
+        if ($validator) {
+            $validate = $validator->validate($oldFilePath, $this->file_name);
+            if (!$validate) {
+                if ($throwExceptionIfInvalid) {
+                    throw new InvalidFileForScenarioException($validator->getLastError());
+                } else {
+                    return $this;
+                }
+            }
+        }
 
         $this->scenario = $scenarioInstance->getId();
         $this->save();
@@ -254,7 +267,7 @@ class File extends Model
             $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
         )) return null;
 
-        
+
         $thumbs = [];
         if ($scenarioInstance->hasThumnbails()) {
             if ($regenerateThumbnailsIfNeeded) {
