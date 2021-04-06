@@ -75,7 +75,7 @@ class File extends Model
             return null;
         }
 
-        return $scenario->getStorage()->getAbsoluteFilePath($this->hash, $this->ext);
+        return $scenario->getStorage()->getAbsoluteFilePath($this->hash, $this->ext, null, $scenario->shouldSaveOriginalFilename());
     }
 
     public function setScenario($scenario, $regenerateThumbnails = false, $throwExceptionIfInvalid = false)
