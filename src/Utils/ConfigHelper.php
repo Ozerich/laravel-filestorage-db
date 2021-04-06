@@ -150,6 +150,16 @@ class ConfigHelper
         return self::thumb(1200, 630, false, true);
     }
 
+    public static function openGraphThumb()
+    {
+        return self::thumbOpenGraph();
+    }
+
+    public static function openGraphValidator()
+    {
+        return self::imageValidator(20, false, false);
+    }
+
     public static function backgroundThumbnails($use2x = false)
     {
         if ($use2x == false) {
