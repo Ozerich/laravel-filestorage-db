@@ -29,7 +29,7 @@ abstract class BaseStorage
 
     abstract function getFilePath($file_hash, $file_ext, Thumbnail $thumbnail = null, $originalFileName = null);
 
-    abstract function getAbsoluteFilePath($file_hash, $file_ext, Thumbnail $thumbnail = null, $originalFileName = null);
+    abstract function getAbsoluteFilePath($file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false, $originalFileName = null);
 
     abstract function getFileContent($file_hash, $file_ext, Thumbnail $thumbnail = null, $originalFileName = null);
 }
