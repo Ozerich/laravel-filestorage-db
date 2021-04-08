@@ -334,7 +334,7 @@ class Storage
         return ImageService::prepareThumbnails($file, $scenario, $thumbnail);
     }
 
-    public function setFileScenario(string|int $fileId, string $scenario): ?File
+    public function setFileScenario(string|int $fileId, ?string $scenario): ?File
     {
         /** @var FileRepository $repository */
         $repository = App::make(FileRepository::class);
