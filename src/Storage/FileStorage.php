@@ -46,9 +46,15 @@ class FileStorage extends BaseStorage
      * @param boolean $is_2x
      * @return string
      */
-    public function getAbsoluteFilePath($file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false, $originalFileName = null)
+    public function getAbsoluteFilePath($file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false, $originalFileName = null, $returnNullIfNotExists = false)
     {
-        return $this->uploadDirPath . $this->getFilePath($file_hash, $file_ext, $thumbnail, null, $is_2x, $originalFileName);
+        $result = $this->uploadDirPath . $this->getFilePath($file_hash, $file_ext, $thumbnail, null, $is_2x, $originalFileName);
+
+        if ($returnNullIfNotExists && !is_file($result)) {
+            return null;
+        }
+
+        return $result;
     }
 
     /**
@@ -133,12 +139,14 @@ class FileStorage extends BaseStorage
         @unlink($this->getAbsoluteFilePath($file_hash, $file_ext, $thumbnail, $is_2x, $originalFileName));
     }
 
-    public function deleteAllThumbnails($file_hash, $originalFileName = null)
+    public function getThumbnailPathes($file_hash, $originalFileName = null)
     {
+        $result = [];
+
         $path = $this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($file_hash);
 
         if (!is_dir($path)) {
-            return;
+            return $result;
         }
 
         if ($handle = opendir($path)) {
@@ -159,14 +167,23 @@ class FileStorage extends BaseStorage
                 $filename = mb_substr($entry, 0, $p);
                 if ($originalFileName) {
                     if ($filename != $originalFileName) {
-                        @unlink($path . DIRECTORY_SEPARATOR . $entry);
+                        $result[] = $path . DIRECTORY_SEPARATOR . $entry;
                     }
                 } else {
                     if ($filename != $file_hash) {
-                        @unlink($path . DIRECTORY_SEPARATOR . $entry);
+                        $result[] = $path . DIRECTORY_SEPARATOR . $entry;
                     }
                 }
             }
+        }
+
+        return $result;
+    }
+
+    public function deleteAllThumbnails($file_hash, $originalFileName = null)
+    {
+        foreach ($this->getThumbnailPathes($file_hash, $originalFileName) as $filePath) {
+            @unlink($filePath);
         }
     }
 

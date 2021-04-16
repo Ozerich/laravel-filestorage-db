@@ -316,7 +316,7 @@ class Storage
         $scenario = (new StorageConfig())->getScenarioByName($file->scenario);
 
         if ($scenario) {
-            $scenario->getStorage()->deleteAllThumbnails($file->hash);
+            $scenario->getStorage()->deleteAllThumbnails($file->hash, $scenario->shouldSaveOriginalFilename());
         }
     }
 

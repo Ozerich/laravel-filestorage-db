@@ -35,10 +35,10 @@ class File extends Model
      * @return \Ozerich\FileStorage\Structures\Scenario
      * @throws InvalidScenarioException
      */
-    private function scenarioInstance()
+    public function scenarioInstance($throwException = true)
     {
         $scenario = Storage::getScenario($this->scenario);
-        if (!$scenario) {
+        if (!$scenario && $throwException) {
             throw new InvalidScenarioException('Scenario "' . $this->scenario . '" not found');
         }
         return $scenario;
@@ -76,7 +76,7 @@ class File extends Model
         }
 
         return $scenario->getStorage()->getAbsoluteFilePath($this->hash, $this->ext, null, false,
-            $scenario->shouldSaveOriginalFilename() ? $this->name : null
+            $scenario->shouldSaveOriginalFilename() ? $this->name : null, true
         );
     }
 
