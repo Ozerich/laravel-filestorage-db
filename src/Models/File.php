@@ -31,6 +31,24 @@ class File extends Model
 
     protected $table = 'files';
 
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleted(function (self $file) {
+            $file->deleteSelfFiles();
+        });
+    }
+
+    private function deleteSelfFiles()
+    {
+        $scenario = $this->scenarioInstance(false);
+        if ($scenario) {
+            $scenario->getStorage()->deleteAllThumbnails($this->hash, $scenario->shouldSaveOriginalFilename());
+            $scenario->getStorage()->removeByPath($this->getPath());
+        }
+    }
+
     /**
      * @return \Ozerich\FileStorage\Structures\Scenario
      * @throws InvalidScenarioException

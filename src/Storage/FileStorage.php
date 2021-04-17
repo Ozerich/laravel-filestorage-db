@@ -54,7 +54,7 @@ class FileStorage extends BaseStorage
             return null;
         }
 
-        return $result;
+        return realpath($result);
     }
 
     /**
@@ -139,16 +139,20 @@ class FileStorage extends BaseStorage
         @unlink($this->getAbsoluteFilePath($file_hash, $file_ext, $thumbnail, $is_2x, $originalFileName));
     }
 
+    public function removeByPath(?string $path): bool
+    {
+        if (!$path) return false;
+        return @unlink($path);
+    }
+
     public function getThumbnailPathes($file_hash, $originalFileName = null)
     {
-        $result = [];
-
         $path = $this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($file_hash);
-
         if (!is_dir($path)) {
-            return $result;
+            return [];
         }
 
+        $result = [];
         if ($handle = opendir($path)) {
             while (false !== ($entry = readdir($handle))) {
                 if ($entry == '.' || $entry == '..') {
@@ -165,14 +169,8 @@ class FileStorage extends BaseStorage
                 }
 
                 $filename = mb_substr($entry, 0, $p);
-                if ($originalFileName) {
-                    if ($filename != $originalFileName) {
-                        $result[] = $path . DIRECTORY_SEPARATOR . $entry;
-                    }
-                } else {
-                    if ($filename != $file_hash) {
-                        $result[] = $path . DIRECTORY_SEPARATOR . $entry;
-                    }
+                if (($originalFileName && $filename != $originalFileName) || (!$originalFileName && $filename != $file_hash)) {
+                    $result[] = realpath($path . DIRECTORY_SEPARATOR . $entry);
                 }
             }
         }
@@ -229,5 +227,44 @@ class FileStorage extends BaseStorage
         }
 
         return $sep . $this->getInnerDirectory($file_hash) . $sep . $this->getFileName($filename, $file_ext, $thumbnail, $is_2x);
+    }
+
+    private function getAllFilesRec($dir = null, &$results = array())
+    {
+        $files = scandir($dir);
+        foreach ($files as $key => $value) {
+            $path = realpath($dir . DIRECTORY_SEPARATOR . $value);
+            if (!is_dir($path)) {
+                $results[] = $path;
+            } else if ($value != "." && $value != ".." && $value !== '.gitignore') {
+                $this->getAllFilesRec($path, $results);
+            }
+        }
+
+        return $results;
+    }
+
+    private function removeEmptyFoldersRec(string $path)
+    {
+        $empty = true;
+        foreach (glob($path . DIRECTORY_SEPARATOR . "*") as $file) {
+            if (is_dir($file)) {
+                if (!$this->removeEmptyFoldersRec($file)) $empty = false;
+            } else {
+                $empty = false;
+            }
+        }
+        if ($empty) rmdir($path);
+        return $empty;
+    }
+
+    public function getAllFiles(): array
+    {
+        return $this->getAllFilesRec($this->uploadDirPath);
+    }
+
+    public function removeEmptyFolders()
+    {
+        return $this->removeEmptyFoldersRec($this->uploadDirPath);
     }
 }

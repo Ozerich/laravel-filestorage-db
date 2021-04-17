@@ -32,4 +32,8 @@ abstract class BaseStorage
     abstract function getAbsoluteFilePath($file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false, $originalFileName = null, $returnNullIfNotExists = false);
 
     abstract function getFileContent($file_hash, $file_ext, Thumbnail $thumbnail = null, $originalFileName = null);
+
+    abstract function getAllFiles(): array;
+
+    abstract function removeEmptyFolders();
 }

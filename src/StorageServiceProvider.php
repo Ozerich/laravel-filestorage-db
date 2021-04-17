@@ -3,6 +3,7 @@
 namespace Ozerich\FileStorage;
 
 use Illuminate\Support\ServiceProvider;
+use Ozerich\FileStorage\Commands\DeleteNotExistedFilesCommand;
 use Ozerich\FileStorage\Commands\RegenerateThumbnailsCommand;
 use Ozerich\FileStorage\Services\TempFile;
 
@@ -26,6 +27,7 @@ class StorageServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 RegenerateThumbnailsCommand::class,
+                DeleteNotExistedFilesCommand::class,
             ]);
         }
 
