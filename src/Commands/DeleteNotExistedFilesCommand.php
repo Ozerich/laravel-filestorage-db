@@ -45,7 +45,8 @@ class DeleteNotExistedFilesCommand extends Command
 
         echo "Loading used files..." . PHP_EOL;
         $usedPathes = [];
-        $this->withProgressBar($fileRepository->all(), function (File $file) use (&$usedPathes) {
+        $deletedCount = 0;
+        $this->withProgressBar($fileRepository->all(), function (File $file) use (&$usedPathes, &$deletedCount) {
             $scenario = $file->scenarioInstance(false);
             if (!$scenario) {
                 return;
@@ -56,12 +57,15 @@ class DeleteNotExistedFilesCommand extends Command
             $filePath = $file->getPath();
             if ($filePath) {
                 $filePathes[] = $filePath;
+            } else {
+                $file->delete();
+                $deletedCount++;
             }
 
             $usedPathes = array_merge($usedPathes, $filePathes);
         });
         $usedPathes = array_values(array_unique($usedPathes));
-        echo PHP_EOL . 'Found ' . count($usedPathes) . ' used files on storage';
+        echo PHP_EOL . 'Found ' . count($usedPathes) . ' used files on storage, deleted ' . $deletedCount;
 
         echo PHP_EOL . "Find files to delete..." . PHP_EOL;
         $toDelete = [];
