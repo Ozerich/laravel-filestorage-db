@@ -260,10 +260,11 @@ class Storage
             }
         }
 
-        $scenario->getStorage()->upload(
+        $result = $scenario->getStorage()->upload(
             $file_path, $file_hash, $file_ext, null, false,
             $scenario->shouldSaveOriginalFilename() ? $file_name : null
         );
+
 
         $model = $this->createModel($temp->getPath(), $file_hash, $file_name, $file_ext, $scenario);
 
