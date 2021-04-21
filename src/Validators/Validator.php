@@ -29,6 +29,14 @@ class Validator
      */
     public function setExtensions($value)
     {
+        if (is_array($value) == false) {
+            $value = [$value];
+        }
+
+        $value = array_map(function ($ext) {
+            return strtolower($ext);
+        }, $value);
+
         $this->extensions = $value;
     }
 
@@ -269,6 +277,24 @@ class Validator
         return null;
     }
 
+    private function isCsvMimeType(string $mimeType): bool
+    {
+        $csv_mimetypes = array(
+            'text/csv',
+            'text/plain',
+            'application/csv',
+            'text/comma-separated-values',
+            'application/excel',
+            'application/vnd.ms-excel',
+            'application/vnd.msexcel',
+            'text/anytext',
+            'application/octet-stream',
+            'application/txt',
+        );
+
+        return in_array($mimeType, $csv_mimetypes);
+    }
+
     /**
      * @param string $file_path
      * @param string $file_name
@@ -279,6 +305,7 @@ class Validator
         if (!is_file($file_path)) {
             return false;
         }
+
         if ($this->maxSize && filesize($file_path) > $this->maxSize) {
             $this->addError(__('filestorage::messages.file_too_big', [
                 'size' => round($this->maxSize / 1024 / 1024, 2) . ' MB'
@@ -286,7 +313,13 @@ class Validator
         }
 
         if ($this->checkExtensionByMimeType) {
-            $extension = $this->getExtensionByMime(mime_content_type($file_path));
+            $fileMimeType = mime_content_type($file_path);
+
+            if (in_array('csv', $this->extensions) && $this->isCsvMimeType($fileMimeType)) {
+                return empty($this->errors);
+            }
+
+            $extension = $this->getExtensionByMime($fileMimeType);
         } else {
             $p = strrpos($file_name, '.');
             if ($p !== false) {
