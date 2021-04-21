@@ -44,7 +44,7 @@ class Storage
         return $this->uploadError;
     }
 
-    public function createFromLocalFile($path, $scenario = null)
+    public function createFromLocalFile($path, $scenario = null, $filename = null)
     {
         if (!empty($scenario)) {
             $scenarioInstance = $this->config->getScenarioByName($scenario);
@@ -60,18 +60,21 @@ class Storage
             }
         }
 
-        $slashPos = mb_strrpos($path, '/');
-        if ($slashPos === false) {
-            return null;
+        if (is_null($filename)) {
+            $slashPos = mb_strrpos($path, '/');
+            if ($slashPos === false) {
+                return null;
+            }
+            $filename = mb_substr($path, $slashPos + 1);
         }
-        $fileName = mb_substr($path, $slashPos + 1);
-        $p = mb_strrpos($fileName, '.');
-        $fileExt = $p === false ? null : mb_substr($fileName, $p + 1);
+
+        $p = mb_strrpos($filename, '.');
+        $fileExt = $p === false ? null : mb_substr($filename, $p + 1);
 
         $temp = new TempFile();
         $temp->from($path);
 
-        return $this->createFile($temp->getPath(), $fileName, $fileExt, $scenarioInstance);
+        return $this->createFile($temp->getPath(), $filename, $fileExt, $scenarioInstance);
     }
 
     public function createFromUrl($url, $scenario = null)
@@ -260,11 +263,10 @@ class Storage
             }
         }
 
-        $result = $scenario->getStorage()->upload(
+        $scenario->getStorage()->upload(
             $file_path, $file_hash, $file_ext, null, false,
             $scenario->shouldSaveOriginalFilename() ? $file_name : null
         );
-
 
         $model = $this->createModel($temp->getPath(), $file_hash, $file_name, $file_ext, $scenario);
 
