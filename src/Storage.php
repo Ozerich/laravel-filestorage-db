@@ -334,6 +334,10 @@ class Storage
             return false;
         }
 
+        if (!$scenario->hasThumnbails()) {
+            return true;
+        }
+
         return ImageService::prepareThumbnails($file, $scenario, $thumbnail);
     }
 
