@@ -112,7 +112,7 @@ class File extends Model
 
         $validator = $scenarioInstance->getValidator();
         if ($validator) {
-            $validate = $validator->validate($oldFilePath, $this->file_name);
+            $validate = $validator->validate($oldFilePath, $this->name);
             if (!$validate) {
                 if ($throwExceptionIfInvalid) {
                     throw new InvalidFileForScenarioException($validator->getLastError());
