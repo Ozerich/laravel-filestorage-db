@@ -168,7 +168,7 @@ class File extends Model
     public function getThumbnailsJson($thumbnails)
     {
         $scenarioInstance = $this->scenarioInstance();
-        if ($scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext, null, false, $scenario->shouldSaveOriginalFilename() ? $this->name : null) == false) {
+        if ($scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext, null, false, $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null) == false) {
             return null;
         }
 
