@@ -44,7 +44,7 @@ class Storage
         return $this->uploadError;
     }
 
-    public function createFromLocalFile($path, $scenario = null, $filename = null)
+    public function createFromLocalFile($path, $scenario = null, $filename = null, $generateThumbnails = false)
     {
         if (!empty($scenario)) {
             $scenarioInstance = $this->config->getScenarioByName($scenario);
@@ -74,10 +74,10 @@ class Storage
         $temp = new TempFile();
         $temp->from($path);
 
-        return $this->createFile($temp->getPath(), $filename, $fileExt, $scenarioInstance);
+        return $this->createFile($temp->getPath(), $filename, $fileExt, $scenarioInstance, $generateThumbnails);
     }
 
-    public function createFromUrl($url, $scenario = null)
+    public function createFromUrl($url, $scenario = null, $generateThumbnails = true)
     {
         if (!empty($scenario)) {
             $scenarioInstance = $this->config->getScenarioByName($scenario);
@@ -133,10 +133,10 @@ class Storage
             $file_ext = ImageService::mime2ext($mime);
         }
 
-        return $this->createFile($temp->getPath(), $file_name, $file_ext, $scenarioInstance);
+        return $this->createFile($temp->getPath(), $file_name, $file_ext, $scenarioInstance, $generateThumbnails);
     }
 
-    public function createFromBase64($base64Data, $fileName, $scenario = null)
+    public function createFromBase64($base64Data, $fileName, $scenario = null,$generateThumbnails = true)
     {
         if (!empty($scenario)) {
             $scenarioInstance = $this->config->getScenarioByName($scenario);
@@ -180,10 +180,10 @@ class Storage
         $temp = new TempFile();
         $temp->write($image_raw);
 
-        return $this->createFile($temp->getPath(), $fileName, $file_ext, $scenarioInstance);
+        return $this->createFile($temp->getPath(), $fileName, $file_ext, $scenarioInstance, $generateThumbnails);
     }
 
-    public function createFromRequest($scenario = null, $requestFieldName = 'file')
+    public function createFromRequest($scenario = null, $requestFieldName = 'file', $generateThumbnails = true)
     {
         /** @var Request $request */
         $request = app()->request;
@@ -212,11 +212,12 @@ class Storage
             $file->getPathName(),
             $file->getClientOriginalName(),
             $file->getClientOriginalExtension(),
-            $scenarioInstance
+            $scenarioInstance,
+            $generateThumbnails
         );
     }
 
-    private function createFile($file_path, $file_name, $file_ext, Scenario $scenario)
+    private function createFile($file_path, $file_name, $file_ext, Scenario $scenario, $generateThumbnails = true)
     {
         $temp = new TempFile($file_ext);
         $temp->from($file_path);
@@ -274,7 +275,7 @@ class Storage
             return null;
         }
 
-        if ($scenario->hasThumnbails()) {
+        if ($generateThumbnails && $scenario->hasThumnbails()) {
             dispatch(new PrepareThumbnailsJob($model));
         }
 
