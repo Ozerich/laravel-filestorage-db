@@ -227,7 +227,9 @@ class File extends Model
         $scenario = $this->scenarioInstance();
 
         if ($this->isFileExists($thumbnailName) == false) {
-            return null;
+            return [
+                'url' => $this->getUrl()
+            ];
         }
 
         try {
