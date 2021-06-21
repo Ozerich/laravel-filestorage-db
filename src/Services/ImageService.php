@@ -86,7 +86,11 @@ class ImageService
      */
     private static function prepareThumbnailBySize($file_path, Thumbnail $thumbnail, $thumbnail_file_path, $quality = 100, $is_2x = false, $is_webp = false)
     {
-        $image = new ResizeImage($file_path);
+        try {
+            $image = new ResizeImage($file_path);
+        } catch (\Throwable) {
+            return false;
+        }
 
         if (!$image || $image->isValid() == false) {
             return false;
