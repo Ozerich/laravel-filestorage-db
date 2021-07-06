@@ -21,7 +21,7 @@ class ConfigHelper
 
     public static function imageValidator($maxSizeMB = 50, $includeGif = false, $includeSvg = true)
     {
-        $extensions = ['jpg', 'jpeg', 'png'];
+        $extensions = ['jpg', 'jpeg', 'png', 'webp'];
 
         if ($includeGif) {
             $extensions[] = 'gif';
