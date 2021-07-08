@@ -102,6 +102,7 @@ class Validator
             'image/x-windows-bmp' => 'bmp',
             'image/ms-bmp' => 'bmp',
             'image/x-ms-bmp' => 'bmp',
+            'image/webp' => 'webp',
             'application/bmp' => 'bmp',
             'application/x-bmp' => 'bmp',
             'application/x-win-bitmap' => 'bmp',
