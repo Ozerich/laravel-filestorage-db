@@ -135,7 +135,7 @@ class FileStorage extends BaseStorage
      */
     public function upload($src, $file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false, $originalFileName = false)
     {
-        $directory = $this->uploadDirPath . $this->getInnerDirectory($file_hash);
+        $directory = $this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($file_hash);
 
         if (!is_dir($directory)) {
             mkdir($directory, 0777, true);
