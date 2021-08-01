@@ -47,13 +47,13 @@ class ConfigHelper
         ];
     }
 
-    public static function fileStorage($folderName)
+    public static function fileStorage($folderName, $innerFoldersCount = 2)
     {
         return [
             'type' => 'file',
-            'saveOriginalFilename' => false,
             'uploadDirPath' => __DIR__ . '/../../../../../storage/app/public/uploads/' . $folderName,
             'uploadDirUrl' => '/uploads/' . $folderName,
+            'innerFoldersCount' => $innerFoldersCount,
         ];
     }
 

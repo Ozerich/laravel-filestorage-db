@@ -13,16 +13,29 @@ class FileStorage extends BaseStorage
     /** @var string */
     public $uploadDirUrl;
 
+    /** @var int */
+    public $innerFoldersCount = 2;
+
+    public function __construct($config)
+    {
+        parent::__construct($config);
+
+        $this->innerFoldersCount = min(4, $this->innerFoldersCount);
+    }
+
     /**
      * @param $file_hash
      * @return string
      */
     protected function getInnerDirectory($file_hash)
     {
-        return implode(DIRECTORY_SEPARATOR, [
-            mb_strtolower(mb_substr($file_hash, 0, 2)),
-            mb_strtolower(mb_substr($file_hash, 2, 2))
-        ]);
+        $result = [];
+
+        for ($i = 0; $i < $this->innerFoldersCount; $i++) {
+            $result[] = mb_strtolower(mb_substr($file_hash, $i * 2, 2));
+        }
+
+        return implode(DIRECTORY_SEPARATOR, $result);
     }
 
     /**
@@ -122,7 +135,7 @@ class FileStorage extends BaseStorage
      */
     public function upload($src, $file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false, $originalFileName = false)
     {
-        $directory = $this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($file_hash);
+        $directory = $this->uploadDirPath . $this->getInnerDirectory($file_hash);
 
         if (!is_dir($directory)) {
             mkdir($directory, 0777, true);
@@ -169,7 +182,7 @@ class FileStorage extends BaseStorage
 
     public function getThumbnailPathes($file_hash, $originalFileName = null)
     {
-        $path = $this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($file_hash);
+        $path = $this->uploadDirPath . $this->getInnerDirectory($file_hash);
         if (!is_dir($path)) {
             return [];
         }
@@ -248,7 +261,12 @@ class FileStorage extends BaseStorage
             $filename = $file_hash;
         }
 
-        return $sep . $this->getInnerDirectory($file_hash) . $sep . $this->getFileName($filename, $file_ext, $thumbnail, $is_2x);
+        $innerDirectory = $this->getInnerDirectory($file_hash);
+        if (!empty($innerDirectory)) {
+            $innerDirectory = $sep . $innerDirectory;
+        }
+
+        return $innerDirectory . $sep . $this->getFileName($filename, $file_ext, $thumbnail, $is_2x);
     }
 
     private function getAllFilesRec($dir = null, &$results = array())
