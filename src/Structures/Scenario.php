@@ -4,8 +4,10 @@ namespace Ozerich\FileStorage\Structures;
 
 use Ozerich\FileStorage\Exceptions\InvalidConfigException;
 use Ozerich\FileStorage\Exceptions\InvalidThumbnailException;
+use Ozerich\FileStorage\Storage;
 use Ozerich\FileStorage\Storage\BaseStorage;
 use Ozerich\FileStorage\Storage\FileStorage;
+use Ozerich\FileStorage\StorageConfig;
 use Ozerich\FileStorage\Validators\Validator;
 
 class Scenario
@@ -77,6 +79,11 @@ class Scenario
                 throw new InvalidConfigException('Quality is invalid');
             } else {
                 $this->quality = $config['quality'];
+            }
+        } else {
+            $defaultQuality = (new StorageConfig())->getDefaultImageQuality();
+            if ($defaultQuality) {
+                $this->quality = $defaultQuality;
             }
         }
     }

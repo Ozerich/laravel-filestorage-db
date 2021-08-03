@@ -21,6 +21,11 @@ class StorageConfig
         return $this->config('defaultValidator', null);
     }
 
+    public function getDefaultImageQuality()
+    {
+        return $this->config('defaultImageQuality', null);
+    }
+
     public function getDefaultScenario()
     {
         $defaultStorage = $this->config('defaultStorage');

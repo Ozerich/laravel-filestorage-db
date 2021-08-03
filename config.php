@@ -4,7 +4,10 @@ use Ozerich\FileStorage\Utils\ConfigHelper;
 
 return [
     'defaultStorage' => ConfigHelper::temporaryStorage(),
+
     'defaultValidator' => ConfigHelper::defaultValidator(),
+
+    'defaultImageQuality' => 88,
 
     'scenarios' => [
         'zip' => [
