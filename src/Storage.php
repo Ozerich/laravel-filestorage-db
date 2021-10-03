@@ -385,4 +385,24 @@ class Storage
 
         return $model->id;
     }
+
+    public function clone(int $fileId): ?int
+    {
+        /** @var FileRepository $repository */
+        $repository = App::make(FileRepository::class);
+
+        $file = $repository->findById($fileId);
+        if (!$file) {
+            return null;
+        }
+
+        $fileLocally = $file->getPath();
+        if (!$fileLocally) {
+            return null;
+        }
+
+        $model = $this->createFromLocalFile($fileLocally, $file->scenario, $file->name, true);
+
+        return $model ? $model->id : null;
+    }
 }
