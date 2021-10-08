@@ -136,6 +136,36 @@ class Storage
         return $this->createFile($temp->getPath(), $file_name, $file_ext, $scenarioInstance, $generateThumbnails);
     }
 
+    public function createFromRaw($rawData, $fileName, $scenario = null, $generateThumbnails = true)
+    {
+        if (!empty($scenario)) {
+            $scenarioInstance = $this->config->getScenarioByName($scenario);
+            if (!$scenarioInstance) {
+                $this->uploadError = 'Invalid scenario';
+                return null;
+            }
+        } else {
+            $scenarioInstance = $this->config->getDefaultScenario();
+            if (!$scenarioInstance) {
+                $this->uploadError = 'Cannot create default scenario, it seems that defaultStorage is not set in config filestorage.php';
+                return null;
+            }
+        }
+
+        $file_ext = null;
+        if (!empty($fileName)) {
+            $file_ext_data = explode('.', $fileName);
+            if (count($file_ext_data) > 1) {
+                $file_ext = $file_ext_data[count($file_ext_data) - 1];
+            }
+        }
+
+        $temp = new TempFile();
+        $temp->write($rawData);
+
+        return $this->createFile($temp->getPath(), $fileName, $file_ext, $scenarioInstance, $generateThumbnails);
+    }
+
     public function createFromBase64($base64Data, $fileName, $scenario = null,$generateThumbnails = true)
     {
         if (!empty($scenario)) {
