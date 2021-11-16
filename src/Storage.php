@@ -286,7 +286,7 @@ class Storage
             $baseFilenameWithoutExt = $baseFilenamePointPos !== null ? substr($baseFilename, 0, $baseFilenamePointPos) : $baseFilename;
 
             while (true) {
-                if ($scenario->getStorage()->isFileExists($file_hash, $file_ext, null, false, $file_name) == false) {
+                if ($scenario->shouldReplaceFileIfExists() || $scenario->getStorage()->isFileExists($file_hash, $file_ext, null, false, $file_name) == false) {
                     break;
                 }
                 $ind = $ind + 1;

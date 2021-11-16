@@ -39,6 +39,9 @@ class Scenario
     /** @var boolean */
     private $saveOriginalFilename = false;
 
+    /** @var boolean */
+    private $replaceFileIfExists = false;
+
     /**
      * Scenario constructor.
      * @param $id
@@ -67,6 +70,7 @@ class Scenario
         }
 
         $this->saveOriginalFilename = $config['saveOriginalFilename'] ?? false;
+        $this->replaceFileIfExists = $config['replaceFileIfExists'] ?? false;
 
         if (isset($config['fixOrientation'])) {
             $this->fixOrientation = (bool)$config['fixOrientation'];
@@ -239,5 +243,13 @@ class Scenario
     public function shouldSaveOriginalFilename()
     {
         return $this->saveOriginalFilename;
+    }
+
+    /**
+     * @return bool
+     */
+    public function shouldReplaceFileIfExists()
+    {
+        return $this->replaceFileIfExists;
     }
 }

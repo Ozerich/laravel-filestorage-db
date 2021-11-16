@@ -53,7 +53,7 @@ class ConfigHelper
             'type' => 'file',
             'uploadDirPath' => __DIR__ . '/../../../../../storage/app/public/uploads/' . $folderName,
             'uploadDirUrl' => '/uploads/' . $folderName,
-            'innerFoldersCount' => $innerFoldersCount,
+            'innerFoldersCount' => $innerFoldersCount
         ];
     }
 
