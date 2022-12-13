@@ -125,6 +125,7 @@ class Storage
         try {
             DownloadFile::download($url, $temp->getPath());
         } catch (\Exception $ex) {
+            $this->uploadError = $ex->getMessage();
             return null;
         }
 
@@ -166,7 +167,7 @@ class Storage
         return $this->createFile($temp->getPath(), $fileName, $file_ext, $scenarioInstance, $generateThumbnails);
     }
 
-    public function createFromBase64($base64Data, $fileName, $scenario = null,$generateThumbnails = true)
+    public function createFromBase64($base64Data, $fileName, $scenario = null, $generateThumbnails = true)
     {
         if (!empty($scenario)) {
             $scenarioInstance = $this->config->getScenarioByName($scenario);

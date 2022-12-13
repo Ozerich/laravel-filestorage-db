@@ -2,6 +2,8 @@
 
 namespace Ozerich\FileStorage\Utils;
 
+use Ozerich\FileStorage\Exceptions\DownloadFileException;
+
 class DownloadFile
 {
     public static function download($url, $filepath)
@@ -15,7 +17,13 @@ class DownloadFile
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         curl_exec($ch);
+        $info = curl_getinfo($ch);
         curl_close($ch);
         fclose($fp);
+
+        if ($info['http_code'] !== 200) {
+            @unlink($filepath);
+            throw new DownloadFileException('Can not download ' . $url . ' - Response code: ' . $info['http_code']);
+        }
     }
 }
