@@ -182,7 +182,7 @@ class FileStorage extends BaseStorage
 
     public function getThumbnailPathes($file_hash, $originalFileName = null)
     {
-        $path = $this->uploadDirPath . $this->getInnerDirectory($file_hash);
+        $path = $this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($file_hash);
         if (!is_dir($path)) {
             return [];
         }
