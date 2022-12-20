@@ -355,7 +355,7 @@ class Storage
         }
     }
 
-    public static function :staticPrepareThumbnails(File $file, ?Thumbnail $thumbnail = null, $forceRegenerate = false)
+    public static function staticPrepareThumbnails(File $file, ?Thumbnail $thumbnail = null, $forceRegenerate = false)
     {
         if ($forceRegenerate) {
             self::staticDeleteThumbnails($file, $thumbnail);

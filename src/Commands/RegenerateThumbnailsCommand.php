@@ -13,7 +13,7 @@ class RegenerateThumbnailsCommand extends Command
      *
      * @var string
      */
-    protected $signals = 'filestorage:regenerate-thumbnails {file_id=0}';
+    protected $signature = 'filestorage:regenerate-thumbnails {file_id=0}';
 
     /**
      * The console command description.
