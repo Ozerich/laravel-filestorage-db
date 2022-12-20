@@ -33,6 +33,7 @@ class RegenerateThumbnailsCommand extends Command
 
             if ($fileId && $file->id != $fileId) {
                 echo "Skip\n";
+                continue;
             }
 
             Storage::staticPrepareThumbnails($file, null, true);
