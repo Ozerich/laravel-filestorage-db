@@ -13,7 +13,7 @@ class RegenerateThumbnailsCommand extends Command
      *
      * @var string
      */
-    protected $name = 'filestorage:regenerate-thumbnails';
+    protected $signals = 'filestorage:regenerate-thumbnails {file_id=0}';
 
     /**
      * The console command description.
@@ -24,10 +24,17 @@ class RegenerateThumbnailsCommand extends Command
 
     public function handle(FileRepository $fileRepository)
     {
+        $fileId = $this->argument('file_id');
+
         $files = $fileRepository->all()->reverse();
 
         foreach ($files as $ind => $file) {
             echo 'File ' . ($ind + 1) . ' / ' . count($files) . ': ID ' . $file->id . ' ---- ';
+
+            if ($fileId && $file->id != $fileId) {
+                echo "Skip\n";
+            }
+
             Storage::staticPrepareThumbnails($file, null, true);
             echo "OK\n";
         }
