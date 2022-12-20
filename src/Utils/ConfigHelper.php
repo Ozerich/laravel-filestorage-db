@@ -77,7 +77,7 @@ class ConfigHelper
         }
     }
 
-    public static function thumb($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = true, $quality = null)
+    public static function thumb($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = true)
     {
         self::validateThumb($width, $height, $mode);
 
@@ -90,11 +90,10 @@ class ConfigHelper
             'exact' => $mode == self::MODE_EXACT,
             'force' => $forceResize,
             'force2x' => false,
-            'quality' => $quality
         ];
     }
 
-    public static function thumbWithWebp($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = false, $quality = null)
+    public static function thumbWithWebp($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = false)
     {
         self::validateThumb($width, $height, $mode);
 
@@ -107,11 +106,10 @@ class ConfigHelper
             'exact' => $mode == self::MODE_EXACT,
             'force' => $forceResize,
             'force2x' => false,
-            'quality' => $quality
         ];
     }
 
-    public static function thumbWith2x($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = true, $force2xResize = false, $quality = null)
+    public static function thumbWith2x($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = true, $force2xResize = false)
     {
         self::validateThumb($width, $height, $mode);
 
@@ -124,11 +122,10 @@ class ConfigHelper
             'exact' => $mode == self::MODE_EXACT,
             'force' => $forceResize,
             'force2x' => $force2xResize,
-            'quality' => $quality
         ];
     }
 
-    public static function thumbWithWebpAnd2x($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = true, $force2xResize = false, $quality = null)
+    public static function thumbWithWebpAnd2x($width = null, $height = null, $mode = self::MODE_AUTO, $forceResize = true, $force2xResize = false)
     {
         self::validateThumb($width, $height, $mode);
 
@@ -141,7 +138,6 @@ class ConfigHelper
             'webp' => true,
             'force' => $forceResize,
             'force2x' => $force2xResize,
-            'quality' => $quality
         ];
     }
 
