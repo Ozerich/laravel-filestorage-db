@@ -100,7 +100,7 @@ class File extends Model
         return $result ? realpath($result) : null;
     }
 
-    public function setScenario($scenario, $regenerateThumbnails = false, $throwExceptionIfInvalid = false)
+    public function setScenario($scenario, $regenerateThumbnails = false, $shouldValidate = true, $throwExceptionIfInvalid = false )
     {
         if ($this->scenario == $scenario) {
             return $this;
@@ -110,14 +110,16 @@ class File extends Model
 
         $scenarioInstance = Storage::getScenario($scenario, true);
 
-        $validator = $scenarioInstance->getValidator();
-        if ($validator) {
-            $validate = $validator->validate($oldFilePath, $this->name);
-            if (!$validate) {
-                if ($throwExceptionIfInvalid) {
-                    throw new InvalidFileForScenarioException($validator->getLastError());
-                } else {
-                    return $this;
+        if ($shouldValidate) {
+            $validator = $scenarioInstance->getValidator();
+            if ($validator) {
+                $validate = $validator->validate($oldFilePath, $this->name);
+                if (!$validate) {
+                    if ($throwExceptionIfInvalid) {
+                        throw new InvalidFileForScenarioException($validator->getLastError());
+                    } else {
+                        return $this;
+                    }
                 }
             }
         }
