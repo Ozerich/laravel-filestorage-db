@@ -194,12 +194,9 @@ class Scenario
         if (isset($config['type'])) {
             if ($config['type'] == 'file') {
                 $this->storage = new FileStorage($config);
+            } else if ($config['type'] == 's3') {
+                $this->storage = new Storage\S3Storage($config);
             }
-        } elseif (isset($config['class'])) {
-            /*  $this->storage = \Yii::createObject($config['class'], [$config]);
-              if ($this->storage instanceof BaseStorage == false) {
-                  throw new InvalidConfigException('Invalid storage class, it must be inherited from BaseStorage');
-              }*/
         } else {
             throw new InvalidConfigException('Invalid storage config for scenario "' . $this->getId() . '": type or class are not set');
         }

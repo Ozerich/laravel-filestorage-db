@@ -4,6 +4,7 @@ namespace Ozerich\FileStorage;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Ozerich\FileStorage\Utils\FileNameHelper;
 use Ramsey\Uuid\Uuid;
 use Ozerich\FileStorage\Jobs\PrepareThumbnailsJob;
 use Ozerich\FileStorage\Models\File;
@@ -44,7 +45,7 @@ class Storage
         return $this->uploadError;
     }
 
-    public function createFromLocalFile($path, $scenario = null, $filename = null, $generateThumbnails = false)
+    public function createFromLocalFile($path, $scenario = null, $filename = null, $generateThumbnails = false, $deleteFile = false)
     {
         if (!empty($scenario)) {
             $scenarioInstance = $this->config->getScenarioByName($scenario);
@@ -71,10 +72,13 @@ class Storage
         $p = mb_strrpos($filename, '.');
         $fileExt = $p === false ? null : mb_substr($filename, $p + 1);
 
-        $temp = new TempFile();
-        $temp->from($path);
+        $model = $this->createFile($path, $filename, $fileExt, $scenarioInstance, $generateThumbnails);
 
-        return $this->createFile($temp->getPath(), $filename, $fileExt, $scenarioInstance, $generateThumbnails);
+        if ($deleteFile) {
+            @unlink($path);
+        }
+
+        return $model;
     }
 
     public function createFromUrl($url, $scenario = null, $generateThumbnails = true)
@@ -296,8 +300,8 @@ class Storage
         }
 
         $scenario->getStorage()->upload(
-            $file_path, $file_hash, $file_ext, null, false,
-            $scenario->shouldSaveOriginalFilename() ? $file_name : null
+            $file_path,
+            FileNameHelper::get($file_hash, $file_ext, null, false, $scenario->shouldSaveOriginalFilename() ? $file_name : null),
         );
 
         $model = $this->createModel($temp->getPath(), $file_hash, $file_name, $file_ext, $scenario);
@@ -373,7 +377,7 @@ class Storage
         return ImageService::prepareThumbnails($file, $scenario, $thumbnail);
     }
 
-    public function setFileScenario(string|int $fileId, ?string $scenario, $shouldValidate = true, $throwExceptionIfInvalid = false): ?File
+    public function setFileScenario(string|int $fileId, ?string $scenario): ?File
     {
         /** @var FileRepository $repository */
         $repository = App::make(FileRepository::class);
@@ -384,7 +388,7 @@ class Storage
             return null;
         }
 
-        $model->setScenario($scenario, true, $shouldValidate, $throwExceptionIfInvalid);
+        $model->setScenario($scenario, true, true);
 
         return $model;
     }
@@ -396,7 +400,10 @@ class Storage
         header('Content-Type: ' . $file->mime);
         header("Content-Transfer-Encoding: Binary");
         header("Content-disposition: attachment; filename=\"" . $filename . "\"");
-        readfile($file->getPath());
+
+        $tmpFile = new TempFile();
+        $tmpFile->write($file->getBody());
+        readfile($tmpFile->getPath());
         exit;
     }
 
@@ -427,12 +434,12 @@ class Storage
             return null;
         }
 
-        $fileLocally = $file->getPath();
-        if (!$fileLocally) {
+        $fileBody = $file->getBody();
+        if (!$fileBody) {
             return null;
         }
 
-        $model = $this->createFromLocalFile($fileLocally, $file->scenario, $file->name, true);
+        $model = $this->createFromRaw($fileBody, $file->scenario, $file->name, true);
 
         return $model ? $model->id : null;
     }

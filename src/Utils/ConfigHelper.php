@@ -57,6 +57,20 @@ class ConfigHelper
         ];
     }
 
+    public static function s3Storage($host, $accessKey, $secretKey, $region, $bucket, $path, $publicUrl)
+    {
+        return [
+            'type' => 's3',
+            'host' => $host,
+            'accessKey' => $accessKey,
+            'secretKey' => $secretKey,
+            'region' => $region,
+            'bucket' => $bucket,
+            'path' => $path,
+            'publicUrl' => $publicUrl
+        ];
+    }
+
     public static function temporaryStorage()
     {
         return self::fileStorage('tmp');

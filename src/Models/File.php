@@ -8,7 +8,9 @@ use Ozerich\FileStorage\Exceptions\InvalidFileForScenarioException;
 use Ozerich\FileStorage\Exceptions\InvalidScenarioException;
 use Ozerich\FileStorage\Exceptions\InvalidThumbnailException;
 use Ozerich\FileStorage\Jobs\PrepareThumbnailsJob;
+use Ozerich\FileStorage\Services\TempFile;
 use Ozerich\FileStorage\Storage;
+use Ozerich\FileStorage\Utils\FileNameHelper;
 
 /**
  * Class File
@@ -42,11 +44,7 @@ class File extends Model
 
     private function deleteSelfFiles()
     {
-        $scenario = $this->scenarioInstance(false);
-        if ($scenario) {
-            $scenario->getStorage()->deleteAllThumbnails($this->hash, $scenario->shouldSaveOriginalFilename());
-            $scenario->getStorage()->removeByPath($this->getPath());
-        }
+        // To Do:
     }
 
     /**
@@ -62,11 +60,7 @@ class File extends Model
         return $scenario;
     }
 
-    /**
-     * @param string|null $thumbnail_alias
-     * @return string|null
-     */
-    public function getAbsolutePath($thumbnail_alias = null)
+    public function getBody(): ?string
     {
         try {
             $scenario = $this->scenarioInstance();
@@ -74,52 +68,41 @@ class File extends Model
             return null;
         }
 
-        $thumbnail = null;
-        if (!empty($thumbnail_alias)) {
-            $thumbnail = $scenario->getThumbnailByAlias($thumbnail_alias);
-        }
-
-        return $scenario->getStorage()->getFileUrl(
-            $this->hash, $this->ext, $thumbnail, false,
-            $scenario->shouldSaveOriginalFilename() ? $this->name : null
+        return $scenario->getStorage()->getBody(
+            FileNameHelper::get(
+                $this->hash, $this->ext, null, false,
+                $scenario->shouldSaveOriginalFilename() ? $this->name : null
+            )
         );
     }
 
-    public function getPath()
-    {
-        try {
-            $scenario = $this->scenarioInstance();
-        } catch (InvalidScenarioException $exception) {
-            return null;
-        }
-
-        $result = $scenario->getStorage()->getAbsoluteFilePath($this->hash, $this->ext, null, false,
-            $scenario->shouldSaveOriginalFilename() ? $this->name : null, true
-        );
-
-        return $result ? realpath($result) : null;
-    }
-
-    public function setScenario($scenario, $regenerateThumbnails = false, $shouldValidate = true, $throwExceptionIfInvalid = false )
+    public function setScenario($scenario, $regenerateThumbnails = false, $throwExceptionIfInvalid = false)
     {
         if ($this->scenario == $scenario) {
             return $this;
         }
 
-        $oldFilePath = $this->getPath();
+        $scenarioInstance = $this->scenarioInstance();
+
+        $filename = FileNameHelper::get($this->hash, $this->ext, null, false,
+            $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
+        );
+
+        $tmp = new TempFile();
+        if (!$scenarioInstance->getStorage()->download($filename, $tmp->getPath())) {
+            throw new \Exception('Can not download file - ' . $filename);
+        }
 
         $scenarioInstance = Storage::getScenario($scenario, true);
 
-        if ($shouldValidate) {
-            $validator = $scenarioInstance->getValidator();
-            if ($validator) {
-                $validate = $validator->validate($oldFilePath, $this->name);
-                if (!$validate) {
-                    if ($throwExceptionIfInvalid) {
-                        throw new InvalidFileForScenarioException($validator->getLastError());
-                    } else {
-                        return $this;
-                    }
+        $validator = $scenarioInstance->getValidator();
+        if ($validator) {
+            $validate = $validator->validate($tmp->getPath(), $this->name);
+            if (!$validate) {
+                if ($throwExceptionIfInvalid) {
+                    throw new InvalidFileForScenarioException($validator->getLastError());
+                } else {
+                    return $this;
                 }
             }
         }
@@ -128,8 +111,8 @@ class File extends Model
         $this->save();
 
         $scenarioInstance->getStorage()->upload(
-            $oldFilePath, $this->hash, $this->ext, null, false,
-            $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
+            $tmp->getPath(),
+            $filename
         );
 
         if ($regenerateThumbnails && $scenarioInstance && $scenarioInstance->hasThumnbails()) {
@@ -139,21 +122,30 @@ class File extends Model
         return $this;
     }
 
-    public function getUrl($thumbnail_alias = null, $returnOriginalByDefault = true)
+    public function getUrl($thumbnail_alias = null, $returnOriginalByDefault = true): ?string
     {
-        if (empty($thumbnail_alias)) {
-            return $this->getAbsolutePath();
+        try {
+            $scenarioInstance = $this->scenarioInstance();
+        } catch (InvalidScenarioException $exception) {
+            return null;
         }
 
-        if (!$this->isThumbnailExists($thumbnail_alias)) {
-            return $this->getAbsolutePath();
+        $thumbnail = null;
+        if (!empty($thumbnail_alias)) {
+            $thumbnail = $scenario->getThumbnailByAlias($thumbnail_alias);
         }
 
-        if ($returnOriginalByDefault && !$this->isFileExists($thumbnail_alias)) {
-            return $this->getAbsolutePath();
-        }
+        $filename = FileNameHelper::get(
+            $this->hash, $this->ext, $thumbnail, false,
+            $scenarioInstance->shouldSaveOriginalFilename() ? $thumbnail->name : null
+        );
 
-        return $this->getAbsolutePath($thumbnail_alias);
+        return $scenarioInstance->getStorage()->getFileUrl($filename);
+    }
+
+    public function getLocalPath(): string
+    {
+
     }
 
     private function dashesToCamelCase($string, $capitalizeFirstCharacter = false)
@@ -242,23 +234,27 @@ class File extends Model
 
         $originalFilename = $scenario->shouldSaveOriginalFilename() ? $this->name : null;
 
-        $url = $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail, false, $originalFilename);
-        $url2x = $thumbnail->is2xSupport() && $scenario->getStorage()->isFileExists($this->hash, $this->ext, $thumbnail, true, $originalFilename) ? $scenario->getStorage()->getFileUrl($this->hash, $this->ext, $thumbnail, true, $originalFilename) : null;
-        $url_webp = $thumbnail->isWebpSupport() ? $scenario->getStorage()->getFileUrl($this->hash, 'webp', $thumbnail, false, $originalFilename) : null;
-        $url_webp2x = $thumbnail->isWebpSupport() && $thumbnail->is2xSupport() && $scenario->getStorage()->isFileExists($this->hash, 'webp', $thumbnail, true, $originalFilename) ? $scenario->getStorage()->getFileUrl($this->hash, 'webp', $thumbnail, true, $originalFilename) : null;
-
         $item = [
-            'url' => $url,
+            'url' => $scenario->getStorage()->getFileUrl(
+                FileNameHelper::get($this->hash, $this->ext, $thumbnail, false, $originalFilename)
+            ),
         ];
 
         if ($thumbnail->is2xSupport()) {
-            $item['url_2x'] = $url2x;
+            $item['url_2x'] = $scenario->getStorage()->getFileUrl(
+                FileNameHelper::get($this->hash, $this->ext, $thumbnail, true, $originalFilename)
+            );
         }
 
         if ($thumbnail->isWebpSupport()) {
-            $item['url_webp'] = $url_webp;
+            $item['url_webp'] = $scenario->getStorage()->getFileUrl(
+                FileNameHelper::get($this->hash, 'webp', $thumbnail, false, $originalFilename)
+            );
+
             if ($thumbnail->isWebpSupport() && $thumbnail->is2xSupport()) {
-                $item['url_webp_2x'] = $url_webp2x;
+                $item['url_webp_2x'] = $scenario->getStorage()->getFileUrl(
+                    FileNameHelper::get($this->hash, 'webp', $thumbnail, true, $originalFilename)
+                );
             }
         }
 
@@ -288,11 +284,14 @@ class File extends Model
             return null;
         }
 
-        if (!$scenarioInstance->getStorage()->isFileExists(
+        $filename = FileNameHelper::get(
             $this->hash, $this->ext, null, false,
             $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
-        )) return null;
+        );
 
+        if (!$scenarioInstance->getStorage()->isFileExists($filename)) {
+            return null;
+        }
 
         $thumbs = [];
         if ($scenarioInstance->hasThumnbails()) {
@@ -359,9 +358,9 @@ class File extends Model
             }
         }
 
-        return $scenarioInstance->getStorage()->isFileExists(
-            $this->hash, $this->ext, $thumbnail, false, $scenarioInstance->shouldSaveOriginalFilename()
-        );
+        return $scenarioInstance->getStorage()->isFileExists(FileNameHelper::get(
+            $this->hash, $this->ext, $thumbnail, false, $scenarioInstance->shouldSaveOriginalFilename() ? $file->name : null
+        ));
     }
 
     /**

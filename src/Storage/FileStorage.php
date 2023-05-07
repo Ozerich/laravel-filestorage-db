@@ -4,17 +4,16 @@ namespace Ozerich\FileStorage\Storage;
 
 use Illuminate\Support\Facades\Request;
 use Ozerich\FileStorage\Structures\Thumbnail;
+use Ozerich\FileStorage\Utils\FileNameHelper;
 
 class FileStorage extends BaseStorage
 {
     /** @var string */
-    public $uploadDirPath;
-
+    public string $uploadDirPath;
     /** @var string */
-    public $uploadDirUrl;
-
+    public string $uploadDirUrl;
     /** @var int */
-    public $innerFoldersCount = 2;
+    public int $innerFoldersCount = 2;
 
     public function __construct($config)
     {
@@ -23,33 +22,75 @@ class FileStorage extends BaseStorage
         $this->innerFoldersCount = min(4, $this->innerFoldersCount);
     }
 
-    /**
-     * @param $file_hash
-     * @return string
-     */
-    protected function getInnerDirectory($file_hash)
+    public function isFileExists($filename): bool
+    {
+        $fullPath = realpath($this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($filename));
+        $filePath = $fullPath . DIRECTORY_SEPARATOR . $filename;
+
+        return is_file($filePath);
+    }
+
+    public function upload(string $src, string $dest, bool $deleteSrc = false): bool
+    {
+        $directory = $this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($dest);
+
+        if (!is_dir($directory)) {
+            mkdir($directory, 0777, true);
+        }
+
+        $dest = $directory . DIRECTORY_SEPARATOR . $dest;
+
+        if (is_uploaded_file($src)) {
+            return @move_uploaded_file($src, $dest);
+        } else {
+            if ($deleteSrc) {
+                return @rename($src, $dest);
+            } else {
+                return @copy($src, $dest);
+            }
+        }
+    }
+
+    public function download(string $filename, string $dest): bool
+    {
+        $fullPath = realpath($this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($filename));
+        $filePath = $fullPath . DIRECTORY_SEPARATOR . $filename;
+        if (!is_file($filePath)) return false;
+
+        return copy($filePath, $dest);
+    }
+
+    public function delete(string $fileName): bool
+    {
+        $fullPath = realpath($this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($filename));
+        $filePath = $fullPath . DIRECTORY_SEPARATOR . $filename;
+
+        return @unlink($filePath);
+    }
+
+    public function getFileUrl(string $filename): string
+    {
+        return config('app.url') . $this->uploadDirUrl . '/' . $this->getInnerDirectory($filename) . '/' . $filename;
+    }
+
+    public function getBody(string $filename): ?string
+    {
+        $fullPath = realpath($this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($filename));
+        $filePath = $fullPath . DIRECTORY_SEPARATOR . $filename;
+
+        if (!is_file($filePath)) return false;
+        return file_get_contents($filePath);
+    }
+
+    protected function getInnerDirectory(string $fileName): string
     {
         $result = [];
 
         for ($i = 0; $i < $this->innerFoldersCount; $i++) {
-            $result[] = mb_strtolower(mb_substr($file_hash, $i * 2, 2));
+            $result[] = mb_strtolower(mb_substr($fileName, $i * 2, 2));
         }
 
         return implode(DIRECTORY_SEPARATOR, $result);
-    }
-
-    /**
-     * @param $file_hash
-     * @param $file_ext
-     * @param Thumbnail|null $thumbnail
-     * @param boolean $is_2x
-     * @return string
-     */
-    protected function getFileName($file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false)
-    {
-        $result = $file_hash . ($thumbnail ? '_' . $thumbnail->getFilenamePrefix() . ($is_2x ? '@2x' : '') : '') . '.' . $file_ext;
-
-        return $result;
     }
 
     private function normalizePath($path, $separator = '\\/')
@@ -92,87 +133,6 @@ class FileStorage extends BaseStorage
         return $result;
     }
 
-    /**
-     * @param $file_hash
-     * @param $file_ext
-     * @param Thumbnail|null $thumbnail
-     * @return string
-     */
-    public function getFileContent($file_hash, $file_ext, Thumbnail $thumbnail = null, $originalFileName = null)
-    {
-        $file_path = $this->getAbsoluteFilePath($file_hash, $file_ext, $thumbnail, $originalFileName);
-
-        if (!is_file($file_path)) {
-            return null;
-        }
-
-        $f = fopen($file_path, 'r');
-        $data = fread($f, filesize($file_path));
-        fclose($f);
-
-        return $data;
-    }
-
-    /**
-     * @param $file_hash
-     * @param $file_ext
-     * @param Thumbnail|null $thumbnail
-     * @param boolean $is_2x
-     * @return bool
-     */
-    public function isFileExists($file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false, $originalFileName = null)
-    {
-        return is_file($this->getAbsoluteFilePath($file_hash, $file_ext, $thumbnail, $is_2x, $originalFileName));
-    }
-
-    /**
-     * @param $src
-     * @param $file_hash
-     * @param $file_ext
-     * @param Thumbnail|null $thumbnail
-     * @param bool $is_2x
-     * @return bool
-     */
-    public function upload($src, $file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false, $originalFileName = false)
-    {
-        $directory = $this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($file_hash);
-
-        if (!is_dir($directory)) {
-            mkdir($directory, 0777, true);
-        }
-
-        $dest = $this->getAbsoluteFilePath($file_hash, $file_ext, $thumbnail, $is_2x, $originalFileName);
-
-        if (is_uploaded_file($src)) {
-            return @move_uploaded_file($src, $dest);
-        } else {
-            return @rename($src, $dest);
-        }
-    }
-
-    /**
-     * @param $file_hash
-     * @param $file_ext
-     * @param $dest
-     * @param Thumbnail|null $thumbnail
-     * @return bool
-     */
-    public function download($file_hash, $file_ext, $dest, Thumbnail $thumbnail = null, $originalFileName = null)
-    {
-        return copy($this->getAbsoluteFilePath($file_hash, $file_ext, $thumbnail, false, $originalFileName), $dest);
-    }
-
-    /**
-     * @param $file_hash
-     * @param $file_ext
-     * @param Thumbnail|null $thumbnail
-     */
-    public function delete($file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false, $originalFileName = null)
-    {
-        $this->deleteAllThumbnails($file_hash);
-
-        @unlink($this->getAbsoluteFilePath($file_hash, $file_ext, $thumbnail, $is_2x, $originalFileName));
-    }
 
     public function removeByPath(?string $path): bool
     {
@@ -213,6 +173,7 @@ class FileStorage extends BaseStorage
         return $result;
     }
 
+
     public function deleteAllThumbnails($file_hash, $originalFileName = null)
     {
         foreach ($this->getThumbnailPathes($file_hash, $originalFileName) as $filePath) {
@@ -227,14 +188,7 @@ class FileStorage extends BaseStorage
      * @param boolean $is_2x
      * @return string
      */
-    public function getFileUrl($file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false, $originalFileName = null)
-    {
-        if ($this->isFileExists($file_hash, $file_ext, $thumbnail, $is_2x, $originalFileName) == false) {
-            return null;
-        }
 
-        return config('app.url') . $this->uploadDirUrl . $this->getFilePath($file_hash, $file_ext, $thumbnail, '/', $is_2x, $originalFileName);
-    }
 
     /**
      * @param $file_hash
@@ -266,45 +220,7 @@ class FileStorage extends BaseStorage
             $innerDirectory = $sep . $innerDirectory;
         }
 
-        return $innerDirectory . $sep . $this->getFileName($filename, $file_ext, $thumbnail, $is_2x);
-    }
-
-    private function getAllFilesRec($dir = null, &$results = array())
-    {
-        $files = scandir($dir);
-        foreach ($files as $key => $value) {
-            $path = realpath($dir . DIRECTORY_SEPARATOR . $value);
-            if (!is_dir($path)) {
-                $results[] = $path;
-            } else if ($value != "." && $value != ".." && $value !== '.gitignore') {
-                $this->getAllFilesRec($path, $results);
-            }
-        }
-
-        return $results;
-    }
-
-    private function removeEmptyFoldersRec(string $path)
-    {
-        $empty = true;
-        foreach (glob($path . DIRECTORY_SEPARATOR . "*") as $file) {
-            if (is_dir($file)) {
-                if (!$this->removeEmptyFoldersRec($file)) $empty = false;
-            } else {
-                $empty = false;
-            }
-        }
-        if ($empty) rmdir($path);
-        return $empty;
-    }
-
-    public function getAllFiles(): array
-    {
-        return $this->getAllFilesRec($this->uploadDirPath);
-    }
-
-    public function removeEmptyFolders()
-    {
-        return $this->removeEmptyFoldersRec($this->uploadDirPath);
+        $filename = FileNameHelper::get($filename, $file_ext, $thumbnail, $is_2, $originalFileName);
+        return $innerDirectory . $sep . $filename;
     }
 }

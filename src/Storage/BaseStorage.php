@@ -15,25 +15,15 @@ abstract class BaseStorage
         }
     }
 
-    abstract function isFileExists($file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false, $originalFileName = null);
+    abstract function isFileExists(string $filename): bool;
 
-    abstract function upload($src, $file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false, $originalFileName = null);
+    abstract function upload(string $src, string $dest, bool $deleteSrc = false): bool;
 
-    abstract function download($file_hash, $file_ext, $dest, Thumbnail $thumbnail = null, $originalFileName = null);
+    abstract function download(string $dest, string $filename): bool;
 
-    abstract function delete($file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false, $originalFileName = null);
+    abstract function delete(string $filename): bool;
 
-    abstract function deleteAllThumbnails($file_hash, $originalFileName = null);
+    abstract function getFileUrl(string $filename): string;
 
-    abstract function getFileUrl($file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false, $originalFileName = null);
-
-    abstract function getFilePath($file_hash, $file_ext, Thumbnail $thumbnail = null, $originalFileName = null);
-
-    abstract function getAbsoluteFilePath($file_hash, $file_ext, Thumbnail $thumbnail = null, $is_2x = false, $originalFileName = null, $returnNullIfNotExists = false);
-
-    abstract function getFileContent($file_hash, $file_ext, Thumbnail $thumbnail = null, $originalFileName = null);
-
-    abstract function getAllFiles(): array;
-
-    abstract function removeEmptyFolders();
+    abstract function getBody(string $filename): ?string;
 }

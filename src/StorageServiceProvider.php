@@ -27,7 +27,6 @@ class StorageServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 RegenerateThumbnailsCommand::class,
-                DeleteNotExistedFilesCommand::class,
             ]);
         }
 
