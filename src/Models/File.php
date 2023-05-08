@@ -137,7 +137,7 @@ class File extends Model
 
         $filename = FileNameHelper::get(
             $this->hash, $this->ext, $thumbnail, false,
-            $scenarioInstance->shouldSaveOriginalFilename() ? $thumbnail->name : null
+            $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
         );
 
         return $scenarioInstance->getStorage()->getFileUrl($filename);
@@ -359,7 +359,8 @@ class File extends Model
         }
 
         return $scenarioInstance->getStorage()->isFileExists(FileNameHelper::get(
-            $this->hash, $this->ext, $thumbnail, false, $scenarioInstance->shouldSaveOriginalFilename() ? $file->name : null
+            $this->hash, $this->ext, $thumbnail, false, 
+            $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
         ));
     }
 

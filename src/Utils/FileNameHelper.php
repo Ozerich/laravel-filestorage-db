@@ -8,7 +8,12 @@ class FileNameHelper
 {
     public static function get(string $fileHash, string $fileExt, Thumbnail $thumbnail = null, $is2x = false, ?string $originalFileName = null): string
     {
-        $baseFileName = $originalFileName ?? $fileHash;
+        if ($originalFileName) {
+            $p = strrpos($originalFileName, '.');
+            $baseFileName = $p !== false ? substr($originalFileName, 0, $p) : $originalFileName;
+        } else{
+            $baseFileName = $fileHash;
+        }
 
         return $baseFileName . ($thumbnail ? '_' . $thumbnail->getFilenamePrefix() . ($is2x ? '@2x' : '') : '') . '.' . $fileExt;
     }
