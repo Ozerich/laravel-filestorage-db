@@ -12,7 +12,7 @@ use Ozerich\FileStorage\Validators\Validator;
 
 class Scenario
 {
-    private string $id;
+    private ?string $id = null;
 
     private bool $isSingleThumbnail = false;
 
