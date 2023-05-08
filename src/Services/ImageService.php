@@ -15,7 +15,7 @@ class ImageService
             $file->hash, $file->ext, null, false, $scenario->shouldSaveOriginalFilename() ? $file->name : null
         );
 
-        $temp_file = new TempFile();
+        $temp_file = new TempFile($file->ext);
 
         if (!$scenario->getStorage()->download($fileName, $temp_file->getPath())) {
             throw new \Exception('Failed download file ' . $fileName);
@@ -45,7 +45,7 @@ class ImageService
         $thumbnails = $thumbnail ? [$thumbnail] : $scenario->getThumbnails();
         foreach ($thumbnails as $thumbnail) {
 
-            $temp_thumbnail = new TempFile();
+            $temp_thumbnail = new TempFile($image->ext);
 
             if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality())) {
                 if ($scenario->getStorage()->upload(
@@ -57,7 +57,7 @@ class ImageService
             }
 
             if ($thumbnail->is2xSupport()) {
-                $temp_thumbnail = new TempFile();
+                $temp_thumbnail = new TempFile($image->ext);
                 if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), true, false)) {
                     if ($scenario->getStorage()->upload(
                         $temp_thumbnail->getPath(),
@@ -69,7 +69,7 @@ class ImageService
             }
 
             if ($thumbnail->isWebpSupport()) {
-                $temp_thumbnail = new TempFile();
+                $temp_thumbnail = new TempFile($image->ext);
                 if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), false, true)) {
                     if ($scenario->getStorage()->upload(
                         $temp_thumbnail->getPath(),
@@ -80,7 +80,7 @@ class ImageService
                 }
 
                 if ($thumbnail->is2xSupport()) {
-                    $temp_thumbnail = new TempFile();
+                    $temp_thumbnail = new TempFile($image->ext);
                     if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), true, true)) {
                         if ($scenario->getStorage()->upload(
                             $temp_thumbnail->getPath(),
