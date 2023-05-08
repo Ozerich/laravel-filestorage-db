@@ -44,7 +44,22 @@ class File extends Model
 
     private function deleteSelfFiles()
     {
-        // To Do:
+        try {
+            $scenarioInstance = $this->scenarioInstance();
+        } catch (InvalidScenarioException $exception) {
+            return;
+        }
+
+        if ($scenarioInstance->shouldSaveFilesAfterDeletion()) {
+            return;
+        }
+
+        $scenarioInstance->getStorage()->delete(
+            FileNameHelper::get(
+                $this->hash, $this->ext, null, false,
+                $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
+            )
+        );
     }
 
     /**
@@ -359,7 +374,7 @@ class File extends Model
         }
 
         return $scenarioInstance->getStorage()->isFileExists(FileNameHelper::get(
-            $this->hash, $this->ext, $thumbnail, false, 
+            $this->hash, $this->ext, $thumbnail, false,
             $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
         ));
     }

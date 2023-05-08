@@ -60,7 +60,7 @@ class FileStorage extends BaseStorage
         return copy($filePath, $dest);
     }
 
-    public function delete(string $fileName): bool
+    public function delete(string $filename): bool
     {
         $fullPath = realpath($this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($filename));
         $filePath = $fullPath . DIRECTORY_SEPARATOR . $filename;

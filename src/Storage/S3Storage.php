@@ -83,6 +83,8 @@ class S3Storage extends BaseStorage
             'Bucket' => $this->bucket,
             'Key' => $this->path . '/' . $fileName,
         ]);
+        
+        return true;
     }
 
     function getFileUrl(string $filename): string

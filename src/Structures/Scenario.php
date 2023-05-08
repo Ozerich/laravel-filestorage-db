@@ -12,35 +12,27 @@ use Ozerich\FileStorage\Validators\Validator;
 
 class Scenario
 {
-    /** @var string */
-    private $id;
+    private string $id;
 
-    /** @var bool */
-    private $isSingleThumbnail = false;
+    private bool $isSingleThumbnail = false;
 
-    /** @var array */
-    private $thumbnails = [];
+    private array $thumbnails = [];
 
-    /** @var array */
-    private $thumbnails_by_alias = [];
+    private array $thumbnails_by_alias = [];
 
-    /** @var Validator */
-    private $validator;
+    private ?Validator $validator = null;
 
-    /** @var BaseStorage */
-    private $storage;
+    private BaseStorage $storage;
 
-    /** @var bool */
-    private $fixOrientation = true;
+    private bool $fixOrientation = true;
 
-    /** @var integer */
-    private $quality = 88;
+    private int $quality = 88;
 
-    /** @var boolean */
-    private $saveOriginalFilename = false;
+    private bool $saveOriginalFilename = false;
 
-    /** @var boolean */
-    private $replaceFileIfExists = false;
+    private bool $replaceFileIfExists = false;
+
+    private bool $saveFilesAfterDeletion = false;
 
     /**
      * Scenario constructor.
@@ -71,6 +63,7 @@ class Scenario
 
         $this->saveOriginalFilename = $config['saveOriginalFilename'] ?? false;
         $this->replaceFileIfExists = $config['replaceFileIfExists'] ?? false;
+        $this->saveFilesAfterDeletion = $config['saveFilesAfterDeletion'] ?? false;
 
         if (isset($config['fixOrientation'])) {
             $this->fixOrientation = (bool)$config['fixOrientation'];
@@ -234,12 +227,14 @@ class Scenario
         return $this->isSingleThumbnail;
     }
 
-    /**
-     * @return bool
-     */
-    public function shouldSaveOriginalFilename()
+    public function shouldSaveOriginalFilename(): bool
     {
         return $this->saveOriginalFilename;
+    }
+
+    public function shouldSaveFilesAfterDeletion(): bool
+    {
+        return $this->saveFilesAfterDeletion;
     }
 
     /**
