@@ -291,7 +291,7 @@ class Storage
             $baseFilenameWithoutExt = $baseFilenamePointPos !== null ? substr($baseFilename, 0, $baseFilenamePointPos) : $baseFilename;
 
             while (true) {
-                if ($scenario->shouldReplaceFileIfExists() || $scenario->getStorage()->isFileExists($file_hash, $file_ext, null, false, $file_name) == false) {
+                if ($scenario->shouldReplaceFileIfExists() || $scenario->getStorage()->exists($file_hash, $file_ext, null, false, $file_name) == false) {
                     break;
                 }
                 $ind = $ind + 1;
@@ -352,29 +352,134 @@ class Storage
 
     public static function staticDeleteThumbnails(File $file, ?Thumbnail $thumbnail = null)
     {
+        $thumbnails = $file->thumbnails ? json_decode($file->thumbnails, true) : [];
+        if (empty($thumbnails)) {
+            return;
+        }
+
         $scenario = (new StorageConfig())->getScenarioByName($file->scenario);
 
         if ($scenario) {
-            $scenario->getStorage()->deleteAllThumbnails($file->hash, $scenario->shouldSaveOriginalFilename());
+            foreach ($thumbnails as $thumbnail) {
+                $extParts = explode(':', $thumbnail);
+                if (count($extParts) > 1) {
+                    $ext = $extParts[1];
+                    $filename = $extParts[0];
+                } else {
+                    $ext = $file->ext;
+                    $filename = $extParts[0];
+                }
+
+                $is2x = false;
+                if (str_ends_with($thumbnail, '@2x')) {
+                    $thumbnail = substr(0, strlen($thumbnail) - 3);
+                    $is2x = true;
+                }
+
+                list ($width, $height) = explode('x', $thumbnail);
+
+                $scenario->getStorage()->delete(FileNameHelper::getForSize(
+                    $file->hash, $ext,
+                    $width == 'AUTO' ? null : intval($width), $height == 'AUTO' ? null : intval($height),
+                    $is2x, $scenario->shouldSaveOriginalFilename() ? $file->name : null
+                ));
+
+                $file->removeThumbnail($thumbnail);
+            }
+
+            $file->save();
         }
     }
 
-    public static function staticPrepareThumbnails(File $file, ?Thumbnail $thumbnail = null, $forceRegenerate = false)
+    public static function checkThumbnails(File $file)
     {
-        if ($forceRegenerate) {
+        $scenario = $file->scenarioInstance();
+
+        $thumbMap = [];
+        $requiredThumbnails = [];
+        foreach ($scenario->getThumbnails() as $thumbName => $thumbnail) {
+            $thumbMap[$thumbName] = [];
+            
+            $requiredThumbnails[] = $thumbnail->getDatabaseValue(false, false);
+            $thumbMap[$thumbName][$thumbnail->getDatabaseValue(false, false)] = 0;
+            if ($thumbnail->is2xSupport()) {
+                $requiredThumbnails[] = $thumbnail->getDatabaseValue(true, false);
+                $thumbMap[$thumbName][$thumbnail->getDatabaseValue(true, false)] = 0;
+            }
+            if ($thumbnail->isWebpSupport()) {
+                $requiredThumbnails[] = $thumbnail->getDatabaseValue(false, true);
+                $thumbMap[$thumbName][$thumbnail->getDatabaseValue(false, true)] = 0;
+                if ($thumbnail->is2xSupport()) {
+                    $requiredThumbnails[] = $thumbnail->getDatabaseValue(true, true);
+                    $thumbMap[$thumbName][$thumbnail->getDatabaseValue(true, true)] = 0;
+                }
+            }
+        }
+
+        $currentThumbnails = $file->thumbnails ? json_decode($file->thumbnails, true) : [];
+        foreach ($currentThumbnails as $currentThumbnail) {
+
+            if (!in_array($currentThumbnail, $requiredThumbnails)) {
+                $extParts = explode(':', $currentThumbnail);
+                if (count($extParts) > 1) {
+                    $ext = $extParts[1];
+                    $filename = $extParts[0];
+                } else {
+                    $ext = $file->ext;
+                    $filename = $extParts[0];
+                }
+
+                $is2x = false;
+                if (str_ends_with($filename, '@2x')) {
+                    $thumbnail = substr(0, strlen($filename) - 3);
+                    $is2x = true;
+                }
+
+                list ($width, $height) = explode('x', $filename);
+
+                $scenario->getStorage()->delete(FileNameHelper::getForSize(
+                    $file->hash, $ext,
+                    $width == 'AUTO' ? null : intval($width), $height == 'AUTO' ? null : intval($height),
+                    $is2x, $scenario->shouldSaveOriginalFilename() ? $file->name : null
+                ));
+
+                $file->removeThumbnail($currentThumbnail)->save();
+            }
+
+            foreach ($thumbMap as &$thumb) {
+                if (array_key_exists($currentThumbnail, $thumb)) {
+                    $thumb[$currentThumbnail] = 1;
+                }
+            }
+        }
+
+        foreach ($thumbMap as $thumbName => $thumbData) {
+            $foundZero = false;
+            foreach ($thumbData as $value) {
+                if ($value == 0) {
+                    $foundZero = true;
+                    break;
+                }
+            }
+
+            if ($foundZero) {
+                Storage::staticPrepareThumbnails($file, $scenario->getThumbnailByAlias($thumbName));
+            }
+        }
+    }
+
+    public static function staticPrepareThumbnails(File $file, ?Thumbnail $thumbnail = null)
+    {
+        if (!$thumbnail) {
             self::staticDeleteThumbnails($file, $thumbnail);
         }
 
         $scenario = (new StorageConfig())->getScenarioByName($file->scenario);
-        if (!$scenario) {
-            return false;
+        if (!$scenario || !$scenario->hasThumnbails()) {
+            return;
         }
 
-        if (!$scenario->hasThumnbails()) {
-            return true;
-        }
-
-        return ImageService::prepareThumbnails($file, $scenario, $thumbnail);
+        ImageService::prepareThumbnails($file, $scenario, $thumbnail);
     }
 
     public function setFileScenario(string|int $fileId, ?string $scenario): ?File

@@ -34,10 +34,10 @@ class ImageService
     public static function prepareThumbnails(File $image, Scenario $scenario, ?Thumbnail $thumbnail = null)
     {
         $originalFileName = $scenario->shouldSaveOriginalFilename() ? $image->name : null;
-        $fileName = FileNameHelper::get($image->hash, $image->ext, null, false, $originalFileName);
 
-        if ($scenario->getStorage()->isFileExists($fileName) == false) {
-            return false;
+        $fileName = FileNameHelper::get($image->hash, $image->ext, null, false, $originalFileName);
+        if ($scenario->getStorage()->exists($fileName) == false) {
+            return;
         }
 
         $temp_file = self::createTempFile($image, $scenario);
@@ -48,46 +48,50 @@ class ImageService
             $temp_thumbnail = new TempFile();
 
             if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality())) {
-                $scenario->getStorage()->upload(
+                if ($scenario->getStorage()->upload(
                     $temp_thumbnail->getPath(),
                     FileNameHelper::get($image->hash, $image->ext, $thumbnail, false, $originalFileName)
-                );
+                )) {
+                    $image->addThumbnail($thumbnail->getDatabaseValue(false, false))->save();
+                }
             }
 
             if ($thumbnail->is2xSupport()) {
                 $temp_thumbnail = new TempFile();
                 if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), true, false)) {
-                    $scenario->getStorage()->upload(
+                    if ($scenario->getStorage()->upload(
                         $temp_thumbnail->getPath(),
                         FileNameHelper::get($image->hash, $image->ext, $thumbnail, true, $originalFileName)
-                    );
+                    )) {
+                        $image->addThumbnail($thumbnail->getDatabaseValue(true, false))->save();
+                    }
                 }
             }
 
-            if (!$temp_file) {
-                $temp_file = self::createTempFile($image, $scenario);
-            }
-
-            $temp_thumbnail = new TempFile();
-            if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), false, true)) {
-                $scenario->getStorage()->upload(
-                    $temp_thumbnail->getPath(),
-                    FileNameHelper::get($image->hash, 'webp', $thumbnail, false, $originalFileName)
-                );
-            }
-
-            if ($thumbnail->is2xSupport()) {
+            if ($thumbnail->isWebpSupport()) {
                 $temp_thumbnail = new TempFile();
-                if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), true, true)) {
-                    $scenario->getStorage()->upload(
+                if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), false, true)) {
+                    if ($scenario->getStorage()->upload(
                         $temp_thumbnail->getPath(),
-                        FileNameHelper::get($image->hash, 'webp', $thumbnail, true, $originalFileName)
-                    );
+                        FileNameHelper::get($image->hash, 'webp', $thumbnail, false, $originalFileName)
+                    )) {
+                        $image->addThumbnail($thumbnail->getDatabaseValue(false, true))->save();
+                    }
+                }
+
+                if ($thumbnail->is2xSupport()) {
+                    $temp_thumbnail = new TempFile();
+                    if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), true, true)) {
+                        if ($scenario->getStorage()->upload(
+                            $temp_thumbnail->getPath(),
+                            FileNameHelper::get($image->hash, 'webp', $thumbnail, true, $originalFileName)
+                        )) {
+                            $image->addThumbnail($thumbnail->getDatabaseValue(true, true))->save();
+                        }
+                    }
                 }
             }
         }
-
-        return true;
     }
 
     /**

@@ -32,7 +32,7 @@ class S3Storage extends BaseStorage
         parent::__construct($config);
     }
 
-    public function isFileExists(string $filename): bool
+    public function exists(string $filename): bool
     {
         return $this->s3Client->doesObjectExistV2($this->bucket, $this->path . '/' . $filename);
     }
@@ -83,11 +83,11 @@ class S3Storage extends BaseStorage
             'Bucket' => $this->bucket,
             'Key' => $this->path . '/' . $fileName,
         ]);
-        
+
         return true;
     }
 
-    function getFileUrl(string $filename): string
+    function getUrl(string $filename): string
     {
         return $this->publicUrl . '/' . $this->path . '/' . $filename;
     }

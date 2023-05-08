@@ -15,7 +15,7 @@ abstract class BaseStorage
         }
     }
 
-    abstract function isFileExists(string $filename): bool;
+    abstract function exists(string $filename): bool;
 
     abstract function upload(string $src, string $dest, bool $deleteSrc = false): bool;
 
@@ -23,7 +23,7 @@ abstract class BaseStorage
 
     abstract function delete(string $filename): bool;
 
-    abstract function getFileUrl(string $filename): string;
+    abstract function getUrl(string $filename): string;
 
     abstract function getBody(string $filename): ?string;
 }

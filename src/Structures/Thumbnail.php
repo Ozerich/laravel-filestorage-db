@@ -91,6 +91,21 @@ class Thumbnail
         return ($this->width ? $this->width : 'AUTO') . '_' . ($this->height ? $this->height : 'AUTO');
     }
 
+    public function getDatabaseValue(bool $is2x, bool $isWebp): string
+    {
+        $result = ($this->width ? $this->width : 'AUTO') . 'x' . ($this->height ? $this->height : 'AUTO');
+
+        if ($is2x) {
+            $result .= '@2x';
+        }
+
+        if ($isWebp) {
+            $result .= ':webp';
+        }
+
+        return $result;
+    }
+
     /**
      * @return string
      */

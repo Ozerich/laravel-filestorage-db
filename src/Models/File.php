@@ -26,6 +26,7 @@ use Ozerich\FileStorage\Utils\FileNameHelper;
  * @property int $size
  * @property int $width
  * @property int $height
+ * @property string $thumbnails
  */
 class File extends Model
 {
@@ -53,6 +54,8 @@ class File extends Model
         if ($scenarioInstance->shouldSaveFilesAfterDeletion()) {
             return;
         }
+
+        Storage::staticDeleteThumbnails($this);
 
         $scenarioInstance->getStorage()->delete(
             FileNameHelper::get(
@@ -155,12 +158,7 @@ class File extends Model
             $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
         );
 
-        return $scenarioInstance->getStorage()->getFileUrl($filename);
-    }
-
-    public function getLocalPath(): string
-    {
-
+        return $scenarioInstance->getStorage()->getUrl($filename);
     }
 
     private function dashesToCamelCase($string, $capitalizeFirstCharacter = false)
@@ -172,30 +170,6 @@ class File extends Model
         }
 
         return $str;
-    }
-
-    public function getThumbnailsJson($thumbnails)
-    {
-        $scenarioInstance = $this->scenarioInstance();
-        if ($scenarioInstance->getStorage()->isFileExists($this->hash, $this->ext, null, false, $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null) == false) {
-            return null;
-        }
-
-        if (!is_array($thumbnails)) {
-            $thumbnails = [$thumbnails];
-        }
-
-        $result = [];
-        foreach ($thumbnails as $thumbnail) {
-            try {
-                $value = $this->getThumbnailJson($thumbnail);
-            } catch (InvalidThumbnailException $exception) {
-                $value = null;
-            }
-            $result[$this->dashesToCamelCase($thumbnail)] = $value;
-        }
-
-        return $result;
     }
 
     public function getDefaultThumbnailUrl($scenario = null)
@@ -221,7 +195,7 @@ class File extends Model
         return $this->getThumbnailJson('default', $scenario);
     }
 
-    public function getThumbnailJson($thumbnailName, $scenario = null)
+    public function getThumbnailJson($thumbnailName)
     {
         if ($this->mime == 'image/svg' || $this->mime == 'image/svg+xml') {
             return [
@@ -229,47 +203,39 @@ class File extends Model
             ];
         }
 
-        if ($scenario && $this->scenario != $scenario) {
-            $this->setScenario($scenario);
-        }
-
         $scenario = $this->scenarioInstance();
 
-        if ($this->isFileExists($thumbnailName) == false) {
+        try {
+            $thumbnail = $scenario->getThumbnailByAlias($thumbnailName);
+        } catch (InvalidThumbnailException $invalidThumbnailException) {
             return [
                 'url' => $this->getUrl()
             ];
         }
 
-        try {
-            $thumbnail = $scenario->getThumbnailByAlias($thumbnailName);
-        } catch (InvalidThumbnailException $invalidThumbnailException) {
-            return null;
-        }
-
         $originalFilename = $scenario->shouldSaveOriginalFilename() ? $this->name : null;
 
         $item = [
-            'url' => $scenario->getStorage()->getFileUrl(
+            'url' => $this->isThumbnailExists($thumbnail->getDatabaseValue(false, false)) ? $scenario->getStorage()->getUrl(
                 FileNameHelper::get($this->hash, $this->ext, $thumbnail, false, $originalFilename)
-            ),
+            ) : null
         ];
 
         if ($thumbnail->is2xSupport()) {
-            $item['url_2x'] = $scenario->getStorage()->getFileUrl(
+            $item['url_2x'] = $this->isThumbnailExists($thumbnail->getDatabaseValue(true, false)) ? $scenario->getStorage()->getUrl(
                 FileNameHelper::get($this->hash, $this->ext, $thumbnail, true, $originalFilename)
-            );
+            ) : null;
         }
 
         if ($thumbnail->isWebpSupport()) {
-            $item['url_webp'] = $scenario->getStorage()->getFileUrl(
+            $item['url_webp'] = $this->isThumbnailExists($thumbnail->getDatabaseValue(false, true)) ? $scenario->getStorage()->getUrl(
                 FileNameHelper::get($this->hash, 'webp', $thumbnail, false, $originalFilename)
-            );
+            ) : null;
 
-            if ($thumbnail->isWebpSupport() && $thumbnail->is2xSupport()) {
-                $item['url_webp_2x'] = $scenario->getStorage()->getFileUrl(
+            if ($thumbnail->is2xSupport()) {
+                $item['url_webp_2x'] = $this->isThumbnailExists($thumbnail->getDatabaseValue(true, true)) ? $scenario->getStorage()->getUrl(
                     FileNameHelper::get($this->hash, 'webp', $thumbnail, true, $originalFilename)
-                );
+                ) : null;
             }
         }
 
@@ -287,12 +253,8 @@ class File extends Model
         ];
     }
 
-    public function getFullJson($scenario = null, $withOriginalUrl = false, $regenerateThumbnailsIfNeeded = true, $exceptThumbnails = [])
+    public function getFullJson($ignoreThumbnails = [])
     {
-        if ($scenario && $this->scenario != $scenario) {
-            $this->setScenario($scenario);
-        }
-
         try {
             $scenarioInstance = $this->scenarioInstance();
         } catch (InvalidScenarioException $exception) {
@@ -304,21 +266,19 @@ class File extends Model
             $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
         );
 
-        if (!$scenarioInstance->getStorage()->isFileExists($filename)) {
+        if (!$scenarioInstance->getStorage()->exists($filename)) {
             return null;
         }
 
         $thumbs = [];
+        Storage::checkThumbnails($this);
+        
         if ($scenarioInstance->hasThumnbails()) {
-            if ($regenerateThumbnailsIfNeeded) {
-                Storage::staticPrepareThumbnails($this);
-            }
-
             $thumbnails = $scenarioInstance->getThumbnails();
             $thumbnailsFiltered = [];
-            if (!empty($exceptThumbnails)) {
+            if (!empty($ignoreThumbnails)) {
                 foreach ($thumbnails as $thumbnailAlias => $thumbnailInstance) {
-                    if (in_array($thumbnailAlias, $exceptThumbnails) == false) {
+                    if (in_array($thumbnailAlias, $ignoreThumbnails) == false) {
                         $thumbnailsFiltered[$thumbnailAlias] = $thumbnailInstance;
                     }
                 }
@@ -336,26 +296,16 @@ class File extends Model
             }
         }
 
-        if (!$withOriginalUrl) {
-            if (empty($thumbs)) {
-                return [
-                    'url' => $this->getUrl()
-                ];
-            } else {
-                return $thumbs;
-            }
+        if (empty($thumbs)) {
+            return [
+                'url' => $this->getUrl()
+            ];
+        } else {
+            return $thumbs;
         }
-
-        return [
-            'url' => $this->getUrl(),
-            'thumbnails' => $thumbs
-        ];
     }
 
-    /**
-     * @return bool
-     */
-    public function isFileExists($thumbnailAlias = null)
+    public function exists($thumbnailAlias = null): bool
     {
         try {
             $scenarioInstance = $this->scenarioInstance();
@@ -364,7 +314,6 @@ class File extends Model
         }
 
         $thumbnail = null;
-
         if ($thumbnailAlias) {
             try {
                 $thumbnail = $scenarioInstance->getThumbnailByAlias($thumbnailAlias);
@@ -373,29 +322,31 @@ class File extends Model
             }
         }
 
-        return $scenarioInstance->getStorage()->isFileExists(FileNameHelper::get(
+        return $scenarioInstance->getStorage()->exists(FileNameHelper::get(
             $this->hash, $this->ext, $thumbnail, false,
             $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
         ));
     }
 
-    /**
-     * @param string $thumbnail
-     * @return bool
-     */
-    public function isThumbnailExists($thumbnail)
+    public function addThumbnail(string $thumb): self
     {
-        try {
-            $scenarioInstance = $this->scenarioInstance();
-        } catch (InvalidScenarioException $exception) {
-            return false;
-        }
+        $thumbs = $this->thumbnails ? json_decode($this->thumbnails, true) : [];
+        $thumbs[] = $thumb;
+        $this->thumbnails = json_encode($thumbs);
+        return $this;
+    }
 
-        try {
-            $scenarioInstance->getThumbnailByAlias($thumbnail);
-            return true;
-        } catch (InvalidThumbnailException $exception) {
-            return false;
-        }
+    public function removeThumbnail(string $thumb): self
+    {
+        $thumbs = $this->thumbnails ? json_decode($this->thumbnails, true) : [];
+        $thumbs = array_filter($thumbs, fn($a) => $a != $thumb);
+        $this->thumbnails = $thumbs ? json_encode(array_values($thumbs)) : null;
+        return $this;
+    }
+
+    public function isThumbnailExists(string $thumbKey): bool
+    {
+        $thumbs = $this->thumbnails ? json_decode($this->thumbnails, true) : [];
+        return in_array($thumbKey, $thumbs);
     }
 }

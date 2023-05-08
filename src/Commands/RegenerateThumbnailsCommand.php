@@ -36,7 +36,7 @@ class RegenerateThumbnailsCommand extends Command
                 continue;
             }
 
-            Storage::staticPrepareThumbnails($file, null, true);
+            Storage::staticPrepareThumbnails($file, null);
             echo "OK\n";
         }
     }
