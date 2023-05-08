@@ -150,7 +150,11 @@ class File extends Model
 
         $thumbnail = null;
         if (!empty($thumbnail_alias)) {
-            $thumbnail = $scenario->getThumbnailByAlias($thumbnail_alias);
+            try {
+                $thumbnail = $scenarioInstance->getThumbnailByAlias($thumbnail_alias);
+            } catch (InvalidThumbnailException $exception) {
+                return null;
+            }
         }
 
         $filename = FileNameHelper::get(
@@ -272,7 +276,7 @@ class File extends Model
 
         $thumbs = [];
         Storage::checkThumbnails($this);
-        
+
         if ($scenarioInstance->hasThumnbails()) {
             $thumbnails = $scenarioInstance->getThumbnails();
             $thumbnailsFiltered = [];
