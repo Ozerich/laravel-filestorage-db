@@ -300,7 +300,7 @@ class Storage
         }
 
         $scenario->getStorage()->upload(
-            $file_path,
+            $temp->getPath(),
             FileNameHelper::get($file_hash, $file_ext, null, false, $scenario->shouldSaveOriginalFilename() ? $file_name : null),
         );
 
