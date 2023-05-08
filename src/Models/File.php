@@ -134,7 +134,7 @@ class File extends Model
         );
 
         if ($regenerateThumbnails && $scenarioInstance && $scenarioInstance->hasThumnbails()) {
-            dispatch(new PrepareThumbnailsJob($this));
+            dispatch(new PrepareThumbnailsJob($this->id));
         }
 
         return $this;

@@ -8,22 +8,22 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Ozerich\FileStorage\Models\File;
+use Ozerich\FileStorage\Repositories\FileRepository;
 use Ozerich\FileStorage\Storage;
 use Ozerich\FileStorage\Structures\Scenario;
 
 class PrepareThumbnailsJob implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    private $file;
-    
-    public function __construct(File $file)
+    public function __construct(protected int $id)
     {
-        $this->file = $file;
     }
 
-    public function handle()
+    public function handle(FileRepository $fileRepository)
     {
-        Storage::staticPrepareThumbnails($this->file);
+        $model = $fileRepository->findById($this->id);
+
+        if ($model) {
+            Storage::staticPrepareThumbnails($model);
+        }
     }
 }

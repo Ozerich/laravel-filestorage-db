@@ -311,7 +311,7 @@ class Storage
         }
 
         if ($generateThumbnails && $scenario->hasThumnbails()) {
-            dispatch(new PrepareThumbnailsJob($model));
+            dispatch(new PrepareThumbnailsJob($model->id));
         }
 
         return $model;
