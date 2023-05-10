@@ -4,7 +4,6 @@ namespace Ozerich\FileStorage\Storage;
 
 use Aws\S3\S3Client;
 use Illuminate\Support\Facades\Request;
-use Ozerich\FileStorage\Structures\Thumbnail;
 
 class S3Storage extends BaseStorage
 {
@@ -50,7 +49,8 @@ class S3Storage extends BaseStorage
             $this->s3Client->putObject([
                 'Bucket' => $this->bucket,
                 'Key' => $this->path . '/' . $dest,
-                'SourceFile' => $src
+                'SourceFile' => $src,
+                'ACL' => 'public-read'
             ]);
         } catch (\Exception $exception) {
             return false;
