@@ -13,6 +13,8 @@ class S3Storage extends BaseStorage
 
     protected string $publicUrl;
 
+    protected ?string $acl = null;
+
     private S3Client $s3Client;
 
     public function __construct($config)
@@ -50,7 +52,7 @@ class S3Storage extends BaseStorage
                 'Bucket' => $this->bucket,
                 'Key' => $this->path . '/' . $dest,
                 'SourceFile' => $src,
-                'ACL' => 'public-read'
+                'ACL' => $this->acl,
             ]);
         } catch (\Exception $exception) {
             return false;
