@@ -57,7 +57,7 @@ class ConfigHelper
         ];
     }
 
-    public static function s3Storage($host, $accessKey, $secretKey, $region, $bucket, $path, $publicUrl)
+    public static function s3Storage($host, $accessKey, $secretKey, $region, $bucket, $path, $publicUrl, $acl = 'public-read')
     {
         return [
             'type' => 's3',
@@ -67,7 +67,8 @@ class ConfigHelper
             'region' => $region,
             'bucket' => $bucket,
             'path' => $path,
-            'publicUrl' => $publicUrl
+            'publicUrl' => $publicUrl,
+            'acl' => $acl,
         ];
     }
 
@@ -81,7 +82,8 @@ class ConfigHelper
             'region' => $region,
             'bucket' => $bucket,
             'path' => $path,
-            'publicUrl' => $publicUrl
+            'publicUrl' => $publicUrl,
+            'acl' => null
         ];
     }
 
