@@ -265,15 +265,6 @@ class File extends Model
             return null;
         }
 
-        $filename = FileNameHelper::get(
-            $this->hash, $this->ext, null, false,
-            $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
-        );
-
-        if (!$scenarioInstance->getStorage()->exists($filename)) {
-            return null;
-        }
-
         $thumbs = [];
         Storage::checkThumbnails($this);
 
@@ -352,5 +343,18 @@ class File extends Model
     {
         $thumbs = $this->thumbnails ? json_decode($this->thumbnails, true) : [];
         return in_array($thumbKey, $thumbs);
+    }
+
+    public function isThumbnailExistsByName(string $thumbnailName): bool
+    {
+        $scenario = $this->scenarioInstance();
+
+        try {
+            $thumbnail = $scenario->getThumbnailByAlias($thumbnailName);
+        } catch (InvalidThumbnailException $invalidThumbnailException) {
+            return false;
+        }
+
+        return $this->isThumbnailExists($thumbnail->getDatabaseValue(false, false));
     }
 }
