@@ -357,4 +357,20 @@ class File extends Model
 
         return $this->isThumbnailExists($thumbnail->getDatabaseValue(false, false));
     }
+
+    public function saveContentToTmpFile(): string
+    {
+        $scenarioInstance = $this->scenarioInstance();
+
+        $filename = FileNameHelper::get($this->hash, $this->ext, null, false,
+            $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
+        );
+
+        $tmp = new TempFile();
+        if (!$scenarioInstance->getStorage()->download($filename, $tmp->getPath())) {
+            throw new \Exception('Can not download file - ' . $filename);
+        }
+
+        return $tmp->getPath();
+    }
 }
