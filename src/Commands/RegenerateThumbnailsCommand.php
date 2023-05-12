@@ -13,7 +13,7 @@ class RegenerateThumbnailsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'filestorage:regenerate-thumbnails {file_id=0}';
+    protected $signature = 'filestorage:regenerate-thumbnails {without-thumbnails=1} {file_id=0}';
 
     /**
      * The console command description.
@@ -25,8 +25,9 @@ class RegenerateThumbnailsCommand extends Command
     public function handle(FileRepository $fileRepository)
     {
         $fileId = $this->argument('file_id');
+        $withoutThumbnails = $this->argument('without-thumbnails');
 
-        $files = $fileRepository->all()->reverse();
+        $files = $withoutThumbnails ? $fileRepository->allWithoutThumbnails()->reverse() : $fileRepository->all()->reverse();
 
         foreach ($files as $ind => $file) {
             echo 'File ' . ($ind + 1) . ' / ' . count($files) . ': ID ' . $file->id . ' ---- ';

@@ -36,4 +36,9 @@ class FileRepository
     {
         return $this->model->all();
     }
+
+    public function allWithoutThumbnails(): Collection
+    {
+        return $this->model::query()->whereNull('thumbnails')->get();
+    }
 }
