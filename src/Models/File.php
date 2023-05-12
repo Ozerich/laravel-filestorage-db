@@ -257,7 +257,7 @@ class File extends Model
         ];
     }
 
-    public function getFullJson($ignoreThumbnails = [])
+    public function getFullJson($ignoreThumbnails = [], $checkThumbnails = true)
     {
         try {
             $scenarioInstance = $this->scenarioInstance();
@@ -266,7 +266,10 @@ class File extends Model
         }
 
         $thumbs = [];
-        Storage::checkThumbnails($this);
+
+        if ($checkThumbnails) {
+            Storage::checkThumbnails($this);
+        }
 
         if ($scenarioInstance->hasThumnbails()) {
             $thumbnails = $scenarioInstance->getThumbnails();

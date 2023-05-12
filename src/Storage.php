@@ -399,7 +399,7 @@ class Storage
         $requiredThumbnails = [];
         foreach ($scenario->getThumbnails() as $thumbName => $thumbnail) {
             $thumbMap[$thumbName] = [];
-            
+
             $requiredThumbnails[] = $thumbnail->getDatabaseValue(false, false);
             $thumbMap[$thumbName][$thumbnail->getDatabaseValue(false, false)] = 0;
             if ($thumbnail->is2xSupport()) {
@@ -431,7 +431,7 @@ class Storage
 
                 $is2x = false;
                 if (str_ends_with($filename, '@2x')) {
-                    $thumbnail = substr(0, strlen($filename) - 3);
+                    $filename = substr(0, strlen($filename) - 3);
                     $is2x = true;
                 }
 
