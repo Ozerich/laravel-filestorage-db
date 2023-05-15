@@ -329,7 +329,9 @@ class File extends Model
     public function addThumbnail(string $thumb): self
     {
         $thumbs = $this->thumbnails ? json_decode($this->thumbnails, true) : [];
-        $thumbs[] = $thumb;
+        if(!in_array($thumb, $thumbs)) {
+            $thumbs[] = $thumb;
+        }
         $this->thumbnails = json_encode($thumbs);
         return $this;
     }
