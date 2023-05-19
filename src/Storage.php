@@ -4,6 +4,7 @@ namespace Ozerich\FileStorage;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\App;
+use Ozerich\FileStorage\Exceptions\InvalidScenarioException;
 use Ozerich\FileStorage\Utils\FileNameHelper;
 use Ramsey\Uuid\Uuid;
 use Ozerich\FileStorage\Jobs\PrepareThumbnailsJob;
@@ -28,14 +29,22 @@ class Storage
         $this->config = new StorageConfig();
     }
 
+    private static $scenariosMap = [];
+
     public static function getScenario($scenario, $returnDefaultIfNotFound = false)
     {
+        if (array_key_exists($scenario, self::$scenariosMap)) {
+            return self::$scenariosMap[$scenario];
+        }
+
         $config = new StorageConfig();
 
         $result = $config->getScenarioByName($scenario);
         if (!$result && $returnDefaultIfNotFound) {
             $result = $config->getDefaultScenario();
         }
+
+        self::$scenariosMap[$scenario] = $result;
 
         return $result;
     }

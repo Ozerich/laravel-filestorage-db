@@ -47,7 +47,7 @@ class Scenario
         if (!isset($config['storage'])) {
             throw new InvalidConfigException('storage is required');
         }
-
+        
         $this->createStorage($config['storage']);
 
         if (isset($config['validator']) && $config['validator']) {
@@ -189,6 +189,7 @@ class Scenario
                 $this->storage = new FileStorage($config);
             } else if ($config['type'] == 's3') {
                 $this->storage = new Storage\S3Storage($config);
+
             }
         } else {
             throw new InvalidConfigException('Invalid storage config for scenario "' . $this->getId() . '": type or class are not set');

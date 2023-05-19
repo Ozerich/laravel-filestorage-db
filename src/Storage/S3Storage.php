@@ -19,36 +19,43 @@ class S3Storage extends BaseStorage
 
     public function __construct($config)
     {
-        $s3Config = [
-            'version' => 'latest',
-            'region' => $config['region'],
-            'credentials' => [
-                'key' => $config['accessKey'],
-                'secret' => $config['secretKey']
-            ],
-        ];
+        parent::__construct($config);
+    }
 
-        if (!empty($config['host'])) {
-            $s3Config = array_merge($s3Config, [
-                'endpoint' => $config['host'],
-                'use_path_style_endpoint' => true
-            ]);
+    private function s3Client()
+    {
+        if(!$this->s3Client) {
+            $s3Config = [
+                'version' => 'latest',
+                'region' => $config['region'],
+                'credentials' => [
+                    'key' => $config['accessKey'],
+                    'secret' => $config['secretKey']
+                ],
+            ];
+
+            if (!empty($config['host'])) {
+                $s3Config = array_merge($s3Config, [
+                    'endpoint' => $config['host'],
+                    'use_path_style_endpoint' => true
+                ]);
+            }
+            
+            $this->s3Client = new S3Client($s3Config);
         }
 
-        $this->s3Client = new S3Client($s3Config);
-
-        parent::__construct($config);
+        return $this->s3Client;
     }
 
     public function exists(string $filename): bool
     {
-        return $this->s3Client->doesObjectExistV2($this->bucket, $this->path . '/' . $filename);
+        return $this->s3Client()->doesObjectExistV2($this->bucket, $this->path . '/' . $filename);
     }
 
     public function upload(string $src, string $dest, bool $deleteSrc = false): bool
     {
         try {
-            $this->s3Client->putObject([
+            $this->s3Client()->putObject([
                 'Bucket' => $this->bucket,
                 'Key' => $this->path . '/' . $dest,
                 'SourceFile' => $src,
@@ -68,7 +75,7 @@ class S3Storage extends BaseStorage
     public function download(string $dest, string $filename): bool
     {
         try {
-            $file = $this->s3Client->getObject([
+            $file = $this->s3Client()->getObject([
                 'Bucket' => $this->bucket,
                 'Key' => $this->path . '/' . $dest,
             ]);
@@ -88,7 +95,7 @@ class S3Storage extends BaseStorage
 
     public function delete(string $fileName): bool
     {
-        $this->s3Client->deleteObject([
+        $this->s3Client()->deleteObject([
             'Bucket' => $this->bucket,
             'Key' => $this->path . '/' . $fileName,
         ]);
@@ -104,7 +111,7 @@ class S3Storage extends BaseStorage
     public function getBody(string $filename): ?string
     {
         try {
-            $file = $this->s3Client->getObject([
+            $file = $this->s3Client()->getObject([
                 'Bucket' => $this->bucket,
                 'Key' => $this->path . '/' . $dest,
             ]);
