@@ -115,7 +115,7 @@ class S3Storage extends BaseStorage
         try {
             $file = $this->s3Client()->getObject([
                 'Bucket' => $this->bucket,
-                'Key' => $this->path . '/' . $dest,
+                'Key' => $this->path . '/' . $filename,
             ]);
         } catch (\Exception $exception) {
             return false;
