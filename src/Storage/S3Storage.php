@@ -15,33 +15,35 @@ class S3Storage extends BaseStorage
 
     protected ?string $acl = null;
 
-    private S3Client $s3Client;
+    private ?S3Client $s3Client = null;
+
+    private array $s3Config = [];
 
     public function __construct($config)
     {
-        parent::__construct($config);
+        $this->s3Config = [
+            'version' => 'latest',
+            'region' => $config['region'],
+            'credentials' => [
+                'key' => $config['accessKey'],
+                'secret' => $config['secretKey']
+            ],
+        ];
+
+        if (!empty($config['host'])) {
+            $this->s3Config = array_merge($this->s3Config, [
+                'endpoint' => $config['host'],
+                'use_path_style_endpoint' => true
+            ]);
+        }
+
+        parent::__construct($this->s3Config);
     }
 
-    private function s3Client()
+    private function s3Client(): S3Client
     {
-        if(!$this->s3Client) {
-            $s3Config = [
-                'version' => 'latest',
-                'region' => $config['region'],
-                'credentials' => [
-                    'key' => $config['accessKey'],
-                    'secret' => $config['secretKey']
-                ],
-            ];
-
-            if (!empty($config['host'])) {
-                $s3Config = array_merge($s3Config, [
-                    'endpoint' => $config['host'],
-                    'use_path_style_endpoint' => true
-                ]);
-            }
-            
-            $this->s3Client = new S3Client($s3Config);
+        if (!$this->s3Client) {
+            $this->s3Client = new S3Client($this->s3Config);
         }
 
         return $this->s3Client;
