@@ -37,7 +37,7 @@ class S3Storage extends BaseStorage
             ]);
         }
 
-        parent::__construct($this->s3Config);
+        parent::__construct($config);
     }
 
     private function s3Client(): S3Client
