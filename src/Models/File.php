@@ -261,7 +261,7 @@ class File extends Model
         ];
     }
 
-    public function getFullJson($ignoreThumbnails = [], $checkThumbnails = true)
+    public function getFullJson($ignoreThumbnails = [], $checkThumbnails = false)
     {
         try {
             $scenarioInstance = $this->scenarioInstance();
