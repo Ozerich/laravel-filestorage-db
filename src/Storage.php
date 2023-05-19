@@ -482,7 +482,7 @@ class Storage
         ImageService::prepareThumbnails($file, $scenario, $thumbnail);
     }
 
-    public function setFileScenario(string|int $fileId, ?string $scenario): ?File
+    public function setFileScenario(string|int $fileId, ?string $scenario, ?bool $throwExceptionIfInvalid = false): ?File
     {
         /** @var FileRepository $repository */
         $repository = App::make(FileRepository::class);
@@ -493,7 +493,7 @@ class Storage
             return null;
         }
 
-        $model->setScenario($scenario, true, true);
+        $model->setScenario($scenario, true, $throwExceptionIfInvalid);
 
         return $model;
     }

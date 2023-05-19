@@ -108,7 +108,11 @@ class File extends Model
 
         $tmp = new TempFile();
         if (!$scenarioInstance->getStorage()->download($filename, $tmp->getPath())) {
-            throw new \Exception('Can not download file - ' . $filename);
+            if ($throwExceptionIfInvalid) {
+                throw new \Exception('Can not download file - ' . $filename);
+            } else {
+                return $this;
+            }
         }
 
         $scenarioInstance = Storage::getScenario($scenario, true);
@@ -329,7 +333,7 @@ class File extends Model
     public function addThumbnail(string $thumb): self
     {
         $thumbs = $this->thumbnails ? json_decode($this->thumbnails, true) : [];
-        if(!in_array($thumb, $thumbs)) {
+        if (!in_array($thumb, $thumbs)) {
             $thumbs[] = $thumb;
         }
         $this->thumbnails = json_encode($thumbs);
