@@ -108,11 +108,7 @@ class File extends Model
 
         $tmp = new TempFile();
         if (!$scenarioInstance->getStorage()->download($filename, $tmp->getPath())) {
-            if ($throwExceptionIfInvalid) {
-                throw new \Exception('Can not download file - ' . $filename);
-            } else {
-                return $this;
-            }
+            throw new \Exception('Can not download file - ' . $filename);
         }
 
         $scenarioInstance = Storage::getScenario($scenario, true);
@@ -132,9 +128,13 @@ class File extends Model
         $this->scenario = $scenarioInstance->getId();
         $this->save();
 
+        $newFileName = FileNameHelper::get($this->hash, $this->ext, null, false,
+            $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
+        );
+
         $scenarioInstance->getStorage()->upload(
             $tmp->getPath(),
-            $filename
+            $newFileName
         );
 
         if ($regenerateThumbnails && $scenarioInstance && $scenarioInstance->hasThumnbails()) {
@@ -261,7 +261,7 @@ class File extends Model
         ];
     }
 
-    public function getFullJson($ignoreThumbnails = [], $checkThumbnails = false)
+    public function getFullJson($ignoreThumbnails = [], $checkThumbnails = true)
     {
         try {
             $scenarioInstance = $this->scenarioInstance();
@@ -333,7 +333,7 @@ class File extends Model
     public function addThumbnail(string $thumb): self
     {
         $thumbs = $this->thumbnails ? json_decode($this->thumbnails, true) : [];
-        if (!in_array($thumb, $thumbs)) {
+        if(!in_array($thumb, $thumbs)) {
             $thumbs[] = $thumb;
         }
         $this->thumbnails = json_encode($thumbs);
