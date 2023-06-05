@@ -226,7 +226,7 @@ class File extends Model
         $item = [
             'url' => $this->isThumbnailExists($thumbnail->getDatabaseValue(false, false)) ? $scenario->getStorage()->getUrl(
                 FileNameHelper::get($this->hash, $this->ext, $thumbnail, false, $originalFilename)
-            ) : null
+            ) : $this->getUrl()
         ];
 
         if ($thumbnail->is2xSupport()) {
