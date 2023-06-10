@@ -308,10 +308,15 @@ class Storage
             }
         }
 
-        $scenario->getStorage()->upload(
+        $filename = FileNameHelper::get($file_hash, $file_ext, null, false, $scenario->shouldSaveOriginalFilename() ? $file_name : null);
+        $uploadResult = $scenario->getStorage()->upload(
             $temp->getPath(),
-            FileNameHelper::get($file_hash, $file_ext, null, false, $scenario->shouldSaveOriginalFilename() ? $file_name : null),
+            $filename,
         );
+
+        if (!$uploadResult) {
+            throw new \Exception('Error uploading file "' . $filename . '"');
+        }
 
         $model = $this->createModel($temp->getPath(), $file_hash, $file_name, $file_ext, $scenario);
 
