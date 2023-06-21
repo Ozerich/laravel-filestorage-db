@@ -2,8 +2,6 @@
 
 namespace Ozerich\FileStorage\Storage;
 
-use Ozerich\FileStorage\Structures\Thumbnail;
-
 abstract class BaseStorage
 {
     public function __construct($config)
@@ -15,15 +13,15 @@ abstract class BaseStorage
         }
     }
 
-    abstract function exists(string $filename): bool;
+    abstract function exists(string $filename, string $hash): bool;
 
-    abstract function upload(string $src, string $dest, bool $deleteSrc = false): bool;
+    abstract function upload(string $src, string $dest, string $hash, bool $deleteSrc = false): bool;
 
-    abstract function download(string $dest, string $filename): bool;
+    abstract function download(string $filename, string $hash, string $dest): bool;
 
-    abstract function delete(string $filename): bool;
+    abstract function delete(string $filename, string $hash): bool;
 
-    abstract function getUrl(string $filename): string;
+    abstract function getUrl(string $filename, string $hash): string;
 
-    abstract function getBody(string $filename): ?string;
+    abstract function getBody(string $filename, string $hash): ?string;
 }

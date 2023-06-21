@@ -49,12 +49,12 @@ class S3Storage extends BaseStorage
         return $this->s3Client;
     }
 
-    public function exists(string $filename): bool
+    public function exists(string $filename, string $hash): bool
     {
         return $this->s3Client()->doesObjectExistV2($this->bucket, $this->path . '/' . $filename);
     }
 
-    public function upload(string $src, string $dest, bool $deleteSrc = false): bool
+    public function upload(string $src, string $dest, string $hash, bool $deleteSrc = false): bool
     {
         try {
             $this->s3Client()->putObject([
@@ -74,12 +74,12 @@ class S3Storage extends BaseStorage
         return true;
     }
 
-    public function download(string $dest, string $filename): bool
+    public function download(string $filename, string $hash, string $dest): bool
     {
         try {
             $file = $this->s3Client()->getObject([
                 'Bucket' => $this->bucket,
-                'Key' => $this->path . '/' . $dest,
+                'Key' => $this->path . '/' . $filename,
             ]);
         } catch (\Exception $exception) {
             return false;
@@ -88,14 +88,14 @@ class S3Storage extends BaseStorage
 
         $body = $file->get('Body');
 
-        $f = fopen($filename, 'w+');
+        $f = fopen($dest, 'w+');
         stream_copy_to_stream($body->detach(), $f);
         fclose($f);
 
         return true;
     }
 
-    public function delete(string $fileName): bool
+    public function delete(string $fileName, string $hash): bool
     {
         $this->s3Client()->deleteObject([
             'Bucket' => $this->bucket,
@@ -105,12 +105,12 @@ class S3Storage extends BaseStorage
         return true;
     }
 
-    function getUrl(string $filename): string
+    function getUrl(string $filename, string $hash): string
     {
         return $this->publicUrl . '/' . $this->path . '/' . $filename;
     }
 
-    public function getBody(string $filename): ?string
+    public function getBody(string $filename, string $hash): ?string
     {
         try {
             $file = $this->s3Client()->getObject([

@@ -17,7 +17,7 @@ class ImageService
 
         $temp_file = new TempFile($file->ext);
 
-        if (!$scenario->getStorage()->download($fileName, $temp_file->getPath())) {
+        if (!$scenario->getStorage()->download($fileName, $file->hash, $temp_file->getPath())) {
             throw new \Exception('Failed download file ' . $fileName);
         }
 
@@ -36,7 +36,7 @@ class ImageService
         $originalFileName = $scenario->shouldSaveOriginalFilename() ? $image->name : null;
 
         $fileName = FileNameHelper::get($image->hash, $image->ext, null, false, $originalFileName);
-        if ($scenario->getStorage()->exists($fileName) == false) {
+        if ($scenario->getStorage()->exists($fileName, $image->hash) == false) {
             return;
         }
 
@@ -50,7 +50,8 @@ class ImageService
             if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality())) {
                 if ($scenario->getStorage()->upload(
                     $temp_thumbnail->getPath(),
-                    FileNameHelper::get($image->hash, $image->ext, $thumbnail, false, $originalFileName)
+                    FileNameHelper::get($image->hash, $image->ext, $thumbnail, false, $originalFileName),
+                    $image->hash
                 )) {
                     $image->addThumbnail($thumbnail->getDatabaseValue(false, false))->save();
                 }
@@ -61,7 +62,8 @@ class ImageService
                 if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), true, false)) {
                     if ($scenario->getStorage()->upload(
                         $temp_thumbnail->getPath(),
-                        FileNameHelper::get($image->hash, $image->ext, $thumbnail, true, $originalFileName)
+                        FileNameHelper::get($image->hash, $image->ext, $thumbnail, true, $originalFileName),
+                        $image->hash
                     )) {
                         $image->addThumbnail($thumbnail->getDatabaseValue(true, false))->save();
                     }
@@ -73,7 +75,8 @@ class ImageService
                 if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), false, true)) {
                     if ($scenario->getStorage()->upload(
                         $temp_thumbnail->getPath(),
-                        FileNameHelper::get($image->hash, 'webp', $thumbnail, false, $originalFileName)
+                        FileNameHelper::get($image->hash, 'webp', $thumbnail, false, $originalFileName),
+                    $image->hash,
                     )) {
                         $image->addThumbnail($thumbnail->getDatabaseValue(false, true))->save();
                     }
@@ -84,7 +87,7 @@ class ImageService
                     if (self::prepareThumbnailBySize($temp_file->getPath(), $thumbnail, $temp_thumbnail->getPath(), $scenario->getQuality(), true, true)) {
                         if ($scenario->getStorage()->upload(
                             $temp_thumbnail->getPath(),
-                            FileNameHelper::get($image->hash, 'webp', $thumbnail, true, $originalFileName)
+                            FileNameHelper::get($image->hash, 'webp', $thumbnail, true, $originalFileName), $image->hash
                         )) {
                             $image->addThumbnail($thumbnail->getDatabaseValue(true, true))->save();
                         }

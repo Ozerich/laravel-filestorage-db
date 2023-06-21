@@ -90,7 +90,8 @@ class File extends Model
             FileNameHelper::get(
                 $this->hash, $this->ext, null, false,
                 $scenario->shouldSaveOriginalFilename() ? $this->name : null
-            )
+            ),
+            $this->hash
         );
     }
 
@@ -107,7 +108,7 @@ class File extends Model
         );
 
         $tmp = new TempFile();
-        if (!$scenarioInstance->getStorage()->download($filename, $tmp->getPath())) {
+        if (!$scenarioInstance->getStorage()->download($filename, $this->hash, $tmp->getPath())) {
             throw new \Exception('Can not download file - ' . $filename);
         }
 
@@ -134,7 +135,8 @@ class File extends Model
 
         $scenarioInstance->getStorage()->upload(
             $tmp->getPath(),
-            $newFileName
+            $newFileName,
+            $this->hash,
         );
 
         if ($regenerateThumbnails && $scenarioInstance && $scenarioInstance->hasThumnbails()) {
@@ -166,7 +168,7 @@ class File extends Model
             $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
         );
 
-        return $scenarioInstance->getStorage()->getUrl($filename);
+        return $scenarioInstance->getStorage()->getUrl($filename, $this->hash);
     }
 
     private function dashesToCamelCase($string, $capitalizeFirstCharacter = false)
@@ -225,24 +227,28 @@ class File extends Model
 
         $item = [
             'url' => $this->isThumbnailExists($thumbnail->getDatabaseValue(false, false)) ? $scenario->getStorage()->getUrl(
-                FileNameHelper::get($this->hash, $this->ext, $thumbnail, false, $originalFilename)
+                FileNameHelper::get($this->hash, $this->ext, $thumbnail, false, $originalFilename),
+                $this->hash,
             ) : $this->getUrl()
         ];
 
         if ($thumbnail->is2xSupport()) {
             $item['url_2x'] = $this->isThumbnailExists($thumbnail->getDatabaseValue(true, false)) ? $scenario->getStorage()->getUrl(
-                FileNameHelper::get($this->hash, $this->ext, $thumbnail, true, $originalFilename)
+                FileNameHelper::get($this->hash, $this->ext, $thumbnail, true, $originalFilename),
+                $this->hash,
             ) : null;
         }
 
         if ($thumbnail->isWebpSupport()) {
             $item['url_webp'] = $this->isThumbnailExists($thumbnail->getDatabaseValue(false, true)) ? $scenario->getStorage()->getUrl(
-                FileNameHelper::get($this->hash, 'webp', $thumbnail, false, $originalFilename)
+                FileNameHelper::get($this->hash, 'webp', $thumbnail, false, $originalFilename),
+                $this->hash,
             ) : null;
 
             if ($thumbnail->is2xSupport()) {
                 $item['url_webp_2x'] = $this->isThumbnailExists($thumbnail->getDatabaseValue(true, true)) ? $scenario->getStorage()->getUrl(
-                    FileNameHelper::get($this->hash, 'webp', $thumbnail, true, $originalFilename)
+                    FileNameHelper::get($this->hash, 'webp', $thumbnail, true, $originalFilename),
+                    $this->hash,
                 ) : null;
             }
         }
@@ -327,13 +333,13 @@ class File extends Model
         return $scenarioInstance->getStorage()->exists(FileNameHelper::get(
             $this->hash, $this->ext, $thumbnail, false,
             $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
-        ));
+        ), $this->hash);
     }
 
     public function addThumbnail(string $thumb): self
     {
         $thumbs = $this->thumbnails ? json_decode($this->thumbnails, true) : [];
-        if(!in_array($thumb, $thumbs)) {
+        if (!in_array($thumb, $thumbs)) {
             $thumbs[] = $thumb;
         }
         $this->thumbnails = json_encode($thumbs);
@@ -376,7 +382,7 @@ class File extends Model
         );
 
         $tmp = new TempFile();
-        if (!$scenarioInstance->getStorage()->download($filename, $tmp->getPath())) {
+        if (!$scenarioInstance->getStorage()->download($filename, $this->hash, $tmp->getPath())) {
             throw new \Exception('Can not download file - ' . $filename);
         }
 

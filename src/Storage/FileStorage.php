@@ -22,28 +22,28 @@ class FileStorage extends BaseStorage
         $this->innerFoldersCount = min(4, $this->innerFoldersCount);
     }
 
-    private function getInnerDirectory(string $fileName): string
+    private function getInnerDirectory(string $fileHash): string
     {
         $result = [];
 
         for ($i = 0; $i < $this->innerFoldersCount; $i++) {
-            $result[] = mb_strtolower(mb_substr($fileName, $i * 2, 2));
+            $result[] = mb_strtolower(mb_substr($fileHash, $i * 2, 2));
         }
 
         return implode(DIRECTORY_SEPARATOR, $result);
     }
 
-    public function exists($filename): bool
+    public function exists($filename, $hash): bool
     {
-        $fullPath = realpath($this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($filename));
+        $fullPath = realpath($this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($hash));
         $filePath = $fullPath . DIRECTORY_SEPARATOR . $filename;
 
         return is_file($filePath);
     }
 
-    public function upload(string $src, string $dest, bool $deleteSrc = false): bool
+    public function upload(string $src, string $dest, string $hash, bool $deleteSrc = false): bool
     {
-        $directory = $this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($dest);
+        $directory = $this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($hash);
 
         if (!is_dir($directory)) {
             mkdir($directory, 0777, true);
@@ -62,31 +62,31 @@ class FileStorage extends BaseStorage
         }
     }
 
-    public function download(string $filename, string $dest): bool
+    public function download(string $filename, string $hash, string $dest): bool
     {
-        $fullPath = realpath($this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($filename));
+        $fullPath = realpath($this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($hash));
         $filePath = $fullPath . DIRECTORY_SEPARATOR . $filename;
         if (!is_file($filePath)) return false;
 
         return copy($filePath, $dest);
     }
 
-    public function delete(string $filename): bool
+    public function delete(string $filename, string $hash): bool
     {
-        $fullPath = realpath($this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($filename));
+        $fullPath = realpath($this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($hash));
         $filePath = $fullPath . DIRECTORY_SEPARATOR . $filename;
 
         return @unlink($filePath);
     }
 
-    public function getUrl(string $filename): string
+    public function getUrl(string $filename, string $hash): string
     {
-        return config('app.url') . $this->uploadDirUrl . '/' . $this->getInnerDirectory($filename) . '/' . $filename;
+        return config('app.url') . $this->uploadDirUrl . '/' . $this->getInnerDirectory($hash) . '/' . $filename;
     }
 
-    public function getBody(string $filename): ?string
+    public function getBody(string $filename, string $hash): ?string
     {
-        $fullPath = realpath($this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($filename));
+        $fullPath = realpath($this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($hash));
         $filePath = $fullPath . DIRECTORY_SEPARATOR . $filename;
 
         if (!is_file($filePath)) return false;

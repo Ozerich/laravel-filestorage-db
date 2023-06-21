@@ -300,7 +300,7 @@ class Storage
             $baseFilenameWithoutExt = $baseFilenamePointPos !== null ? substr($baseFilename, 0, $baseFilenamePointPos) : $baseFilename;
 
             while (true) {
-                if ($scenario->shouldReplaceFileIfExists() || $scenario->getStorage()->exists($file_hash, $file_ext, null, false, $file_name) == false) {
+                if ($scenario->shouldReplaceFileIfExists() || $scenario->getStorage()->exists($file_hash, $file_hash) == false) {
                     break;
                 }
                 $ind = $ind + 1;
@@ -312,6 +312,7 @@ class Storage
         $uploadResult = $scenario->getStorage()->upload(
             $temp->getPath(),
             $filename,
+            $file_hash,
         );
 
         if (!$uploadResult) {
@@ -396,7 +397,7 @@ class Storage
                     $file->hash, $ext,
                     $width == 'AUTO' ? null : intval($width), $height == 'AUTO' ? null : intval($height),
                     $is2x, $scenario->shouldSaveOriginalFilename() ? $file->name : null
-                ));
+                ), $file->hash);
 
                 $file->removeThumbnail($thumbnail);
             }
@@ -455,7 +456,7 @@ class Storage
                     $file->hash, $ext,
                     $width == 'AUTO' ? null : intval($width), $height == 'AUTO' ? null : intval($height),
                     $is2x, $scenario->shouldSaveOriginalFilename() ? $file->name : null
-                ));
+                ), $file->hash);
 
                 $file->removeThumbnail($currentThumbnail)->save();
             }
