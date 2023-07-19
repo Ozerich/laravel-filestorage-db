@@ -61,7 +61,8 @@ class File extends Model
             FileNameHelper::get(
                 $this->hash, $this->ext, null, false,
                 $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
-            )
+            ),
+            $this->hash
         );
     }
 
