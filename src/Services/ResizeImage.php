@@ -78,7 +78,16 @@ class ResizeImage
         } elseif ($this->image_type == IMAGETYPE_GIF) {
             return imagecreatefromgif($file);
         } elseif ($this->image_type == IMAGETYPE_PNG) {
-            return imagecreatefrompng($file);
+            try {
+                return imagecreatefrompng($file);
+            } catch(\Throwable $exception){
+                if(str_contains($exception->getMessage(), 'iCCP: known incorrect sRGB profile')){
+                    exec('convert ' . $file . ' ' . $file);
+                    return imagecreatefrompng($file);
+                }
+
+                throw $exception;
+            }
         }
 
         return null;
