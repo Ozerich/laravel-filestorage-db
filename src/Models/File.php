@@ -41,6 +41,10 @@ class File extends Model
         static::deleted(function (self $file) {
             $file->deleteSelfFiles();
         });
+
+        static::softDeleted(function (self $file) {
+            $file->deleteSelfFiles();
+        });
     }
 
     private function deleteSelfFiles()
