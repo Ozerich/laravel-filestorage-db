@@ -34,6 +34,8 @@ class File extends Model
 
     protected $table = 'files';
 
+    private ?TempFile $tmpFile = null;
+
     protected static function boot()
     {
         parent::boot();
@@ -378,6 +380,7 @@ class File extends Model
         return $this->isThumbnailExists($thumbnail->getDatabaseValue(false, false));
     }
 
+
     public function saveContentToTmpFile(): string
     {
         $scenarioInstance = $this->scenarioInstance();
@@ -386,11 +389,11 @@ class File extends Model
             $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
         );
 
-        $tmp = new TempFile();
-        if (!$scenarioInstance->getStorage()->download($filename, $this->hash, $tmp->getPath())) {
+        $this->tmpFile = new TempFile();
+        if (!$scenarioInstance->getStorage()->download($filename, $this->hash, $this->tmpFile->getPath())) {
             throw new \Exception('Can not download file - ' . $filename);
         }
 
-        return $tmp->getPath();
+        return $this->tmpFile->getPath();
     }
 }
