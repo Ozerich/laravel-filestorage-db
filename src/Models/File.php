@@ -396,4 +396,13 @@ class File extends Model
 
         return $this->tmpFile->getPath();
     }
+    
+    public function getLocalPath(): string|null{
+        $scenarioInstance = $this->scenarioInstance();
+                if(!$scenarioInstance->getStorage() instanceof Storage\FileStorage){
+                    throw new \Exception('getLocalPath available only for FileStorage');
+                };
+
+                return $scenarioInstance->getStorage()->getLocalPath($this->name, $this->hash);
+    }
 }

@@ -33,12 +33,14 @@ class FileStorage extends BaseStorage
         return implode(DIRECTORY_SEPARATOR, $result);
     }
 
-    public function exists($filename, $hash): bool
-    {
+    public function getLocalPath(string $filename, string $hash): string{
         $fullPath = realpath($this->uploadDirPath . DIRECTORY_SEPARATOR . $this->getInnerDirectory($hash));
-        $filePath = $fullPath . DIRECTORY_SEPARATOR . $filename;
+       return $fullPath . DIRECTORY_SEPARATOR . $filename;
+    }
 
-        return is_file($filePath);
+    public function exists(string $filename, string $hash): bool
+    {
+        return is_file($this->getLocalPath($filename, $hash));
     }
 
     public function upload(string $src, string $dest, string $hash, bool $deleteSrc = false): bool
