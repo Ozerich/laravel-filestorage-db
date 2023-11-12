@@ -114,7 +114,7 @@ class File extends Model
             $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
         );
 
-        $tmp = new TempFile();
+        $tmp = new TempFile($this->ext);
         if (!$scenarioInstance->getStorage()->download($filename, $this->hash, $tmp->getPath())) {
             throw new \Exception('Can not download file - ' . $filename);
         }
@@ -389,14 +389,14 @@ class File extends Model
             $scenarioInstance->shouldSaveOriginalFilename() ? $this->name : null
         );
 
-        $this->tmpFile = new TempFile();
+        $this->tmpFile = new TempFile($this->ext);
         if (!$scenarioInstance->getStorage()->download($filename, $this->hash, $this->tmpFile->getPath())) {
             throw new \Exception('Can not download file - ' . $filename);
         }
 
         return $this->tmpFile->getPath();
     }
-    
+
     public function getLocalPath(): string|null{
         $scenarioInstance = $this->scenarioInstance();
                 if(!$scenarioInstance->getStorage() instanceof Storage\FileStorage){
