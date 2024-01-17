@@ -56,16 +56,12 @@ class S3Storage extends BaseStorage
 
     public function upload(string $src, string $dest, string $hash, bool $deleteSrc = false): bool
     {
-        try {
-            $this->s3Client()->putObject([
-                'Bucket' => $this->bucket,
-                'Key' => $this->path . '/' . $dest,
-                'SourceFile' => $src,
-                'ACL' => $this->acl,
-            ]);
-        } catch (\Exception $exception) {
-            return false;
-        }
+        $this->s3Client()->putObject([
+            'Bucket' => $this->bucket,
+            'Key' => $this->path . '/' . $dest,
+            'SourceFile' => $src,
+            'ACL' => $this->acl,
+        ]);
 
         if ($deleteSrc) {
             @unlink($src);

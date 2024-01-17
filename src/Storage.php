@@ -309,14 +309,19 @@ class Storage
         }
 
         $filename = FileNameHelper::get($file_hash, $file_ext, null, false, $scenario->shouldSaveOriginalFilename() ? $file_name : null);
-        $uploadResult = $scenario->getStorage()->upload(
-            $temp->getPath(),
-            $filename,
-            $file_hash,
-        );
 
-        if (!$uploadResult) {
-            throw new \Exception('Error uploading file "' . $filename . '"');
+        try {
+            $uploadResult = $scenario->getStorage()->upload(
+                $temp->getPath(),
+                $filename,
+                $file_hash,
+            );
+
+            if (!$uploadResult) {
+                throw new \Exception('Error uploading file "' . $filename . '"');
+            }
+        } catch(\Exception $exception){
+            throw new \Exception('Error uploading file "' . $filename . '" - '.$exception->getMessage());
         }
 
         $model = $this->createModel($temp->getPath(), $file_hash, $file_name, $file_ext, $scenario);
