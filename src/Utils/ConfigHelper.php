@@ -43,7 +43,7 @@ class ConfigHelper
         return [
             'maxSize' => 1000 * 1024 * 1024,
             'checkExtensionByMimeType' => true,
-            'extensions' => ['mp4']
+            'extensions' => ['mp4', 'webm']
         ];
     }
 
