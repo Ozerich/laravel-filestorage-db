@@ -2,8 +2,8 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class FilesAddUuid extends Migration
 {
@@ -22,7 +22,7 @@ class FilesAddUuid extends Migration
 
         $items = DB::select('SELECT id FROM files');
         foreach ($items as $item) {
-            DB::update('UPDATE files SET uuid = "' . \Ramsey\Uuid\Uuid::uuid4() . '" WHERE id=' . $item->id);
+            DB::table('files')->where('id', $item->id)->update(['uuid' => \Ramsey\Uuid\Uuid::uuid4()]);
         }
 
         Schema::table('files', function (Blueprint $table) {
