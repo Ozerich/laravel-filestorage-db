@@ -18,20 +18,27 @@ class FilesChangeTypes extends Migration
             if (DB::getDriverName() === 'pgsql') {
                 DB::statement('ALTER TABLE files ALTER COLUMN width TYPE INTEGER USING width::integer');
             }
-            DB::statement('ALTER TABLE files ALTER COLUMN width DROP NOT NULL');
+            Schema::table('files', function (Blueprint $table) {
+                $table->integer('width')->change();
+            });
         }
 
         if (Schema::hasColumn('files', 'height')) {
             if (DB::getDriverName() === 'pgsql') {
                 DB::statement('ALTER TABLE files ALTER COLUMN height TYPE INTEGER USING height::integer');
             }
-            DB::statement('ALTER TABLE files ALTER COLUMN height DROP NOT NULL');
+            Schema::table('files', function (Blueprint $table) {
+                $table->integer('height')->change();
+            });
         }
 
         if (Schema::hasColumn('files', 'size')) {
-            if(DB::getDriverName() === 'pgsql') {
+            if (DB::getDriverName() === 'pgsql') {
                 DB::statement('ALTER TABLE files ALTER COLUMN size TYPE INTEGER USING size::integer');
             }
+            Schema::table('files', function (Blueprint $table) {
+                $table->integer('size')->change();
+            });
         }
     }
 
